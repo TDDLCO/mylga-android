@@ -9,12 +9,47 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity
+                android:name=".onboarding.MainActivity"
+                android:label="@string/title_activity_main"
+                android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <activity
+                android:name=".adapter.MainActivity"
+                android:label="@string/title_activity_main"
+                android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+                android:name=".ScrollingActivity"
+                android:label="@string/title_activity_scrolling"
+                android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity android:name=".onboarding.RegisterActivity">
+        </activity>
+        <activity
+                android:name=".RegisterrActivity"
+                android:label="@string/title_activity_registerr"
+                android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+                android:name=".onboarding.RegistrationActivity"
+                android:label="@string/title_activity_registration"
+                android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+                android:name=".onboarding.PermissionActivity"
+                android:label="@string/title_activity_permission"
+                android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+                android:name=".onboarding.ConfirmationActivity"
+                android:label="@string/title_activity_confirmation"
+                android:theme="@style/AppTheme.NoActionBar">
         </activity>
     </application>
 

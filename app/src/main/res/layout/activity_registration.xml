@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".onboarding.RegistrationActivity"
+        android:background="@color/colorPrimary"
+        android:padding="30dp"
+>
+
+    <TextView
+            android:id="@+id/text_view_hello"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hello!"
+            android:textColor="@android:color/white"
+            android:textSize="23sp"
+    />
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Let's create your account."
+            android:textColor="@android:color/white"
+            android:textSize="23sp"
+            android:layout_below="@+id/text_view_hello"
+            android:layout_marginTop="10dp"
+    />
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="vertical"
+    >
+        <Button
+                android:id="@+id/btn_signup_twitter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAllCaps="false"
+                android:text="Sign up with Twitter"
+                android:textColor="#775ADA"
+                android:background="@drawable/bg_button"
+
+        />
+
+        <Button
+                android:id="@+id/btn_signup_facebook"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAllCaps="false"
+                android:text="Sign up with Facebook"
+                android:textColor="#775ADA"
+                android:background="@drawable/bg_button"
+                android:layout_marginTop="15dp"
+
+        />
+
+        <Button
+                android:id="@+id/btn_signup_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAllCaps="false"
+                android:text="Sign up with email"
+                android:textColor="#775ADA"
+                android:background="@drawable/bg_button"
+                android:layout_marginTop="15dp"
+
+        />
+
+    </LinearLayout>
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Already have an account? Log in"
+            android:textColor="@android:color/white"
+            android:textSize="17sp"
+            android:layout_alignParentBottom="true"
+            android:gravity="center_horizontal"
+    />
+
+
+</RelativeLayout>
