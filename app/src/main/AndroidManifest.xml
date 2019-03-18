@@ -20,23 +20,6 @@
             </intent-filter>
         </activity>
         <activity
-                android:name=".adapter.MainActivity"
-                android:label="@string/title_activity_main"
-                android:theme="@style/AppTheme.NoActionBar">
-        </activity>
-        <activity
-                android:name=".ScrollingActivity"
-                android:label="@string/title_activity_scrolling"
-                android:theme="@style/AppTheme.NoActionBar">
-        </activity>
-        <activity android:name=".onboarding.RegisterActivity">
-        </activity>
-        <activity
-                android:name=".RegisterrActivity"
-                android:label="@string/title_activity_registerr"
-                android:theme="@style/AppTheme.NoActionBar">
-        </activity>
-        <activity
                 android:name=".onboarding.RegistrationActivity"
                 android:label="@string/title_activity_registration"
                 android:theme="@style/AppTheme.NoActionBar">
@@ -49,6 +32,11 @@
         <activity
                 android:name=".onboarding.ConfirmationActivity"
                 android:label="@string/title_activity_confirmation"
+                android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+                android:name=".HomeActivity"
+                android:label="Home"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
     </application>

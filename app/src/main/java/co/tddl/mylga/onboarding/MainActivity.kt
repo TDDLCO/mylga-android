@@ -4,9 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.view.PagerAdapter
-import android.support.v4.view.ViewPager
-import android.support.v7.app.AppCompatActivity;
+import androidx.viewpager.widget.PagerAdapter
+import androidx.viewpager.widget.ViewPager
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log
 import android.view.*
 import co.tddl.mylga.R
@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
 
         btn_next.setOnClickListener { loadNextSlide() }
 
-        view_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener{
+        view_pager.addOnPageChangeListener(object : androidx.viewpager.widget.ViewPager.OnPageChangeListener{
             override fun onPageScrollStateChanged(p0: Int) {
 
             }
@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
         // else load the main activity
     }
 
-    class OnboardingPagerAdapter : PagerAdapter {
+    class OnboardingPagerAdapter : androidx.viewpager.widget.PagerAdapter {
 
         private var layouts: IntArray
 

@@ -1,12 +1,12 @@
 package co.tddl.mylga.adapter
 
 import android.content.Context
-import android.support.v4.view.PagerAdapter
+import androidx.viewpager.widget.PagerAdapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 
-class OnboardingPagerAdapter : PagerAdapter {
+class OnboardingPagerAdapter : androidx.viewpager.widget.PagerAdapter {
 
     private var layouts: IntArray
 
