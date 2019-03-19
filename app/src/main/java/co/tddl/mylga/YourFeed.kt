@@ -1,6 +1,7 @@
 package co.tddl.mylga
 
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -48,6 +49,10 @@ class YourFeed : Fragment() {
         recyclerView.apply {
             layoutManager = LinearLayoutManager(activity)
             adapter = FeedsRecyclerviewAdapter(feeds)
+        }
+        fab.setOnClickListener {
+            val intent = Intent(activity?.applicationContext, ShareActivity::class.java)
+            activity?.startActivity(intent)
         }
     }
 
