@@ -51,7 +51,7 @@ class YourFeed : Fragment() {
             adapter = FeedsRecyclerviewAdapter(feeds)
         }
         fab.setOnClickListener {
-            val intent = Intent(activity?.applicationContext, ProfileActivity::class.java) //ShareActivity
+            val intent = Intent(activity?.applicationContext, ShareActivity::class.java) 
             activity?.startActivity(intent)
         }
     }

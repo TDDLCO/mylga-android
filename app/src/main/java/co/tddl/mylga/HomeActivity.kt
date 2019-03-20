@@ -1,13 +1,15 @@
 package co.tddl.mylga
 
+import android.content.Intent
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.core.view.GravityCompat
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ImageView
+import android.widget.LinearLayout
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.app_bar_home.*
 import com.google.android.material.tabs.TabLayout
@@ -53,6 +55,20 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             }
         })
+
+        val headerView = nav_view.getHeaderView(0)
+
+        val profilell = headerView.findViewById<LinearLayout>(R.id.profile_linear_layout)
+        val settingsiv = headerView.findViewById<ImageView>(R.id.image_view_settings)
+
+        profilell.setOnClickListener {
+            val intent = Intent(applicationContext, ProfileActivity::class.java)
+            startActivity(intent)
+        }
+        settingsiv.setOnClickListener {
+            val intent = Intent(applicationContext, SettingsActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     override fun onBackPressed() {

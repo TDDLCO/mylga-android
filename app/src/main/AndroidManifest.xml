@@ -57,6 +57,23 @@
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value="co.tddl.mylga.HomeActivity"/>
         </activity>
+        <activity
+                android:name=".SettingsActivity"
+                android:label="Settings"
+                android:parentActivityName=".HomeActivity"
+                android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="co.tddl.mylga.HomeActivity"/>
+        </activity>
+        <activity
+                android:name=".ChangePasswordActivity"
+                android:label="Change Password"
+                android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="co.tddl.mylga.SettingsActivity"/>
+        </activity>
     </application>
 
 </manifest>
