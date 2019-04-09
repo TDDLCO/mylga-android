@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log
 import android.view.*
 import co.tddl.mylga.R
+import co.tddl.mylga.util.SharedPreferenceHelper
 
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -25,7 +26,18 @@ class MainActivity : AppCompatActivity() {
     lateinit var mAdapter: OnboardingPagerAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
+
+        val sharedPref = SharedPreferenceHelper(this)
+
+        if(! sharedPref.isFirstInstallation()){
+            var intent = Intent(this, RegistrationActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
+        sharedPref.setFirstInstall()
 
         if(Build.VERSION.SDK_INT >= 19){
             window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
@@ -51,7 +63,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onPageSelected(p0: Int) {
-                Log.v("CLICK", "YOU CLICKED ME AGAIN AT $p0")
                 if(p0 == layouts.size - 1 ){
                     btn_next.text = "Let's explore!"
                 }else{
@@ -71,6 +82,7 @@ class MainActivity : AppCompatActivity() {
         }else{
             var intent = Intent(this, RegistrationActivity::class.java)
             startActivity(intent)
+            finish()
         }
         // else load the main activity
     }
