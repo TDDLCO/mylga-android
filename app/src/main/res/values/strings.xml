@@ -115,4 +115,7 @@
     <string name="title_activity_profile">ProfileActivity</string>
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="title_activity_change_password">ChangePasswordActivity</string>
+
+    <string name="facebook_app_id">788910464829164</string>
+    <string name="fb_login_protocol_scheme">fb788910464829164</string>
 </resources>

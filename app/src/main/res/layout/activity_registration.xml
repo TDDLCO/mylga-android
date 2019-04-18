@@ -45,7 +45,7 @@
 
         />
 
-        <Button
+        <!--<Button
                 android:id="@+id/btn_signup_facebook"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -53,6 +53,15 @@
                 android:text="Sign up with Facebook"
                 android:textColor="#775ADA"
                 android:background="@drawable/bg_button"
+                android:layout_marginTop="15dp"
+
+        />-->
+
+        <com.facebook.login.widget.LoginButton
+                android:id="@+id/login_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:layout_marginTop="15dp"
 
         />

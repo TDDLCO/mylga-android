@@ -39,4 +39,5 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth:16.2.0'
     implementation 'com.firebaseui:firebase-ui-auth:4.3.1'
     apply plugin: 'com.google.gms.google-services'
+    implementation 'com.facebook.android:facebook-login:[4,5)'
 }
