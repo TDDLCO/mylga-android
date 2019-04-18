@@ -43,7 +43,7 @@ class RegistrationActivity : AppCompatActivity() {
 
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("366853210248-5c7bki8934jacoq4akki4hcsc3ic4uem.apps.googleusercontent.com")
+            .requestIdToken(TOKEN)
             .requestEmail()
             .build()
 
