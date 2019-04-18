@@ -2,6 +2,7 @@ package co.tddl.mylga.onboarding
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity;
 import co.tddl.mylga.HomeActivity
@@ -17,11 +18,13 @@ class PermissionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_permission)
 
-        val ss:String = intent.getStringExtra("INTENT_USER_NAME")
+        val username:String? = intent.getStringExtra(INTENT_USER_NAME)
+        text_view_greeting.text = "Hi $username, nice to meet you."
 
         btn_next.setOnClickListener {
             val intent = Intent(this, HomeActivity::class.java)
             startActivity(intent)
+            finish()
         }
     }
 

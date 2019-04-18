@@ -6,7 +6,10 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import co.tddl.mylga.HomeActivity
 import co.tddl.mylga.R
+import co.tddl.mylga.util.SharedPreferenceContract
+import co.tddl.mylga.util.SharedPreferenceHelper
 import com.facebook.*
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
@@ -43,7 +46,7 @@ class RegistrationActivity : AppCompatActivity() {
 
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(TOKEN)
+            .requestIdToken("366853210248-5c7bki8934jacoq4akki4hcsc3ic4uem.apps.googleusercontent.com")
             .requestEmail()
             .build()
 
@@ -103,8 +106,18 @@ class RegistrationActivity : AppCompatActivity() {
 
     private fun updateUI(account: FirebaseUser?) {  //GoogleSignInAccount
         if(account != null){
-            val intent = Intent(this, ConfirmationActivity::class.java)
-            startActivity(intent)
+            val sharedPref = SharedPreferenceHelper(this)
+
+            if(sharedPref.hasSetUserName()){
+                val intent = Intent(this, HomeActivity::class.java)
+                startActivity(intent)
+                finish()
+            }else{
+                val intent = Intent(this, ConfirmationActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+
         }else{
             Toast.makeText(this, "No account yet", Toast.LENGTH_LONG).show()
         }
