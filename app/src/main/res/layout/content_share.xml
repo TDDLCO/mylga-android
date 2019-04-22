@@ -35,7 +35,7 @@
     </RelativeLayout>
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="100dp"
         android:background="@drawable/rounded_rectangle_gray"
         android:layout_marginBottom="30dp"
     >
@@ -89,6 +89,12 @@
             android:hint="Start typing to see suggested locations"
             android:textSize="15sp"
     />
+
+    <!--<fragment android:id="@+id/autocomplete_fragment"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+    />-->
 
     <Button
         android:layout_width="match_parent"

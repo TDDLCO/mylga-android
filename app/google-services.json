@@ -21,6 +21,10 @@
             "package_name": "co.tddl.mylga",
             "certificate_hash": "72486e75b9af1957f13986d258fd571a0a3d7d4a"
           }
+        },
+        {
+          "client_id": "366853210248-5r54hc6g6q29d7v11ta8p5n6sc92ovpg.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [
@@ -32,7 +36,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "366853210248-5c7bki8934jacoq4akki4hcsc3ic4uem.apps.googleusercontent.com",
+              "client_id": "366853210248-5r54hc6g6q29d7v11ta8p5n6sc92ovpg.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

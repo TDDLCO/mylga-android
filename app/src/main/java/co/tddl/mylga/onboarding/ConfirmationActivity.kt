@@ -14,7 +14,6 @@ import kotlinx.android.synthetic.main.activity_confirmation.*
 class ConfirmationActivity : AppCompatActivity() {
 
     private val INTENT_USER_NAME = "INTENT_USER_NAME"
-    private val sharedPref = SharedPreferenceHelper(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +25,7 @@ class ConfirmationActivity : AppCompatActivity() {
             if(username == null || username.toString().trim() == ""){
                 Toast.makeText(this, "Please fill your username", Toast.LENGTH_SHORT).show()
             }else{
+                val sharedPref = SharedPreferenceHelper(this)
                 sharedPref.setUserName(username.toString())
 
                 val intent = Intent(this, PermissionActivity::class.java)
