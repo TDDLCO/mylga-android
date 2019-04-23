@@ -11,15 +11,27 @@ import android.graphics.Bitmap
 import android.R.attr.data
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.ProgressDialog
 import android.content.ClipData
 import android.net.Uri
 import android.os.Build
 import android.widget.Toast
 import androidx.core.content.FileProvider.getUriForFile
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import com.google.firebase.storage.UploadTask
+import com.google.firebase.storage.OnProgressListener
+import co.tddl.mylga.onboarding.MainActivity
+import androidx.annotation.NonNull
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
+import java.util.UUID.randomUUID
+
+
 
 
 class ShareActivity : AppCompatActivity() {
@@ -27,6 +39,8 @@ class ShareActivity : AppCompatActivity() {
     private val PICK_IMAGE_REQUEST = 71
     private val REQUEST_IMAGE_CAPTURE = 21
     private var filePath: Uri? = null
+    private var firebaseStore: FirebaseStorage? = null
+    private var storageReference: StorageReference? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +48,12 @@ class ShareActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        //get firebase product instances
+        firebaseStore = FirebaseStorage.getInstance()
+        storageReference = FirebaseStorage.getInstance().reference
+
         btn_upload_image.setOnClickListener { takePictureWithCamera() }
+        btn_share_something.setOnClickListener { uploadImage() }
     }
 
     // 1. Launch Intent to Choose picture
@@ -83,6 +102,7 @@ class ShareActivity : AppCompatActivity() {
     }
 
 
+    // Helper method
     private fun setImageViewWithImage() {
         val photoPath: Uri = filePath ?: return
         try {
@@ -116,6 +136,25 @@ class ShareActivity : AppCompatActivity() {
             // val imageBitmap = data?.extras?.get("data") as Bitmap
             // uploadImage.setImageBitmap(imageBitmap)
             setImageViewWithImage()
+        }
+    }
+
+    //3. Upload Image to Firebase Storage
+    private fun uploadImage(){
+        if(filePath != null){
+            val ref = storageReference?.child("uploads/" + UUID.randomUUID().toString())
+            ref?.putFile(filePath!!)
+                ?.addOnSuccessListener {
+                    Toast.makeText(this, "Uploaded", Toast.LENGTH_LONG).show()
+                }
+                ?.addOnFailureListener { e ->
+                    Toast.makeText(this, "Failed " + e.message, Toast.LENGTH_LONG).show()
+                }
+                ?.addOnProgressListener { taskSnapshot ->
+                    Toast.makeText(this, "Uploading... ", Toast.LENGTH_LONG).show()
+                }
+        }else{
+            Toast.makeText(this, "Please Upload an Image", Toast.LENGTH_SHORT).show()
         }
     }
 
