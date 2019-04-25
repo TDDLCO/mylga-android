@@ -13,6 +13,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ProgressDialog
 import android.content.ClipData
+import android.content.ClipDescription
 import android.net.Uri
 import android.os.Build
 import android.widget.Toast
@@ -27,8 +28,12 @@ import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.OnProgressListener
 import co.tddl.mylga.onboarding.MainActivity
 import androidx.annotation.NonNull
+import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import java.util.UUID.randomUUID
 
 
@@ -41,6 +46,7 @@ class ShareActivity : AppCompatActivity() {
     private var filePath: Uri? = null
     private var firebaseStore: FirebaseStorage? = null
     private var storageReference: StorageReference? = null
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +57,7 @@ class ShareActivity : AppCompatActivity() {
         //get firebase product instances
         firebaseStore = FirebaseStorage.getInstance()
         storageReference = FirebaseStorage.getInstance().reference
+        auth = FirebaseAuth.getInstance()
 
         btn_upload_image.setOnClickListener { takePictureWithCamera() }
         btn_share_something.setOnClickListener { uploadImage() }
@@ -143,19 +150,62 @@ class ShareActivity : AppCompatActivity() {
     private fun uploadImage(){
         if(filePath != null){
             val ref = storageReference?.child("uploads/" + UUID.randomUUID().toString())
-            ref?.putFile(filePath!!)
-                ?.addOnSuccessListener {
-                    Toast.makeText(this, "Uploaded", Toast.LENGTH_LONG).show()
+            val uploadTask = ref?.putFile(filePath!!)
+                /*?.addOnSuccessListener { taskSnapshot ->
+                    Toast.makeText(this, "Uploaded ${ref.downloadUrl}", Toast.LENGTH_LONG).show()
+                    location.text = ref.downloadUrl.toString()
                 }
                 ?.addOnFailureListener { e ->
                     Toast.makeText(this, "Failed " + e.message, Toast.LENGTH_LONG).show()
                 }
                 ?.addOnProgressListener { taskSnapshot ->
                     Toast.makeText(this, "Uploading... ", Toast.LENGTH_LONG).show()
+                }*/
+
+            val urlTask = uploadTask?.continueWithTask(Continuation<UploadTask.TaskSnapshot, Task<Uri>> { task ->
+                if (!task.isSuccessful) {
+                    task.exception?.let {
+                        throw it
+                    }
                 }
+                return@Continuation ref.downloadUrl
+            })?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val downloadUri = task.result
+                    //Toast.makeText(this, "Uploaded $downloadUri", Toast.LENGTH_LONG).show()
+                    location.text = downloadUri.toString()
+                    addUploadRecordToDb(downloadUri.toString(), "Lagos, Nigeria", "This is a description")
+                } else {
+                    // Handle failures
+                    // ...
+                }
+            }?.addOnFailureListener{
+
+            }
+
+
         }else{
             Toast.makeText(this, "Please Upload an Image", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun addUploadRecordToDb(uri: String, location: String, description: String ){
+        val db = FirebaseFirestore.getInstance()
+
+        val data = HashMap<String, Any>()
+        data["userId"] = auth.currentUser?.uid.toString()
+        data["imageUrl"] = uri
+        data["location"] = location
+        data["description"] = description
+
+        db.collection("posts")
+            .add(data)
+            .addOnSuccessListener { documentReference ->
+                Toast.makeText(this, "Saved to DB", Toast.LENGTH_LONG).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Error saving to DB", Toast.LENGTH_LONG).show()
+            }
     }
 
 }
