@@ -31,7 +31,7 @@
                 android:id="@+id/text_view_welcome"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Hey Emeka, welcome to your feed"
+                android:text="Hey User, welcome to your feed"
                 android:gravity="center"
                 android:textSize="20sp"
                 android:paddingStart="30dp"
@@ -52,6 +52,7 @@
             />
 
             <Button
+                android:id="@+id/btn_share_first_update"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_purple_button"

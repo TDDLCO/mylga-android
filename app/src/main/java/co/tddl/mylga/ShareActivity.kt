@@ -174,7 +174,7 @@ class ShareActivity : AppCompatActivity() {
                     val downloadUri = task.result
                     //Toast.makeText(this, "Uploaded $downloadUri", Toast.LENGTH_LONG).show()
                     location.text = downloadUri.toString()
-                    addUploadRecordToDb(downloadUri.toString(), "Lagos, Nigeria", "This is a description")
+                    addUploadRecordToDb(downloadUri.toString(), edit_text_location.text.toString(), edit_text_description.text.toString())
                 } else {
                     // Handle failures
                     // ...

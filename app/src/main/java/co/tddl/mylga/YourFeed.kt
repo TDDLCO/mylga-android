@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.tddl.mylga.adapter.FeedsRecyclerviewAdapter
 import co.tddl.mylga.model.Feed
@@ -27,9 +28,6 @@ private const val ARG_PARAM2 = "param2"
  */
 class YourFeed : Fragment() {
 
-    private lateinit var name:String
-    private lateinit var db: FirebaseFirestore
-    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,8 +38,6 @@ class YourFeed : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        db = FirebaseFirestore.getInstance()
-        auth = FirebaseAuth.getInstance()
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_your_feed, container, false)
     }
@@ -50,8 +46,15 @@ class YourFeed : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         getYourFeeds()
 
+        fab.visibility = View.GONE
+
         fab.setOnClickListener {
             val intent = Intent(activity?.applicationContext, ShareActivity::class.java) 
+            activity?.startActivity(intent)
+        }
+
+        btn_share_first_update.setOnClickListener {
+            val intent = Intent(activity?.applicationContext, ShareActivity::class.java)
             activity?.startActivity(intent)
         }
     }
@@ -66,15 +69,31 @@ class YourFeed : Fragment() {
     }
 
     private fun initRecyclerView(feeds: ArrayList<Feed>){
-        if(!feeds.isNullOrEmpty()){
-            text_view_welcome.text = "Hey $name, welcome to your feed"
-            recyclerView.visibility = View.GONE
-            noUpdateCardView.visibility = View.VISIBLE
-        }else{
-            recyclerView.visibility = View.VISIBLE
-            noUpdateCardView.visibility = View.GONE
+        val db = FirebaseFirestore.getInstance()
+        val auth = FirebaseAuth.getInstance()
+        var name = "User"
+        val docRef = db.collection("users").whereEqualTo("id", auth.currentUser?.uid.toString()).limit(1)//.document(auth.currentUser?.uid.toString())
+        docRef.get()
+            .addOnSuccessListener { document ->
+                if(document.size() == 1){
+                    name = document.first()["name"].toString()
+                    text_view_welcome.text = "Hey $name, welcome to your feed"
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.d("Error", "get failed with ", exception)
+            }
 
-            recyclerView.apply {
+        if(feeds.isNullOrEmpty()){
+            recyclerView?.visibility = View.GONE
+            fab?.visibility = View.GONE
+            noUpdateCardView?.visibility = View.VISIBLE
+        }else{
+            recyclerView?.visibility = View.VISIBLE
+            fab?.visibility = View.VISIBLE
+            noUpdateCardView?.visibility = View.GONE
+
+            recyclerView?.apply {
                 layoutManager = LinearLayoutManager(activity)
                 adapter = FeedsRecyclerviewAdapter(feeds)
             }
@@ -83,8 +102,8 @@ class YourFeed : Fragment() {
 
     private fun getYourFeeds(){
         val feeds = arrayListOf<Feed>()
-        // val db = FirebaseFirestore.getInstance()
-        // val auth = FirebaseAuth.getInstance()
+        val db = FirebaseFirestore.getInstance()
+        val auth = FirebaseAuth.getInstance()
 
         db.collection("posts")
             .whereEqualTo("userId", auth.currentUser?.uid.toString())
