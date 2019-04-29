@@ -11,7 +11,6 @@ import android.graphics.Bitmap
 import android.R.attr.data
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.ProgressDialog
 import android.content.ClipData
 import android.content.ClipDescription
 import android.net.Uri
@@ -130,13 +129,14 @@ class ShareActivity : AppCompatActivity() {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK
             && data != null && data.data != null
         ) {
-            filePath = data.data
+            return
+            /*filePath = data.data
             try {
                 val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, filePath)
                 uploadImage.setImageBitmap(bitmap)
             } catch (e: IOException) {
                 e.printStackTrace()
-            }
+            }*/
         }
 
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {

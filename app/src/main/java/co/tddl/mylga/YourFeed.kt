@@ -3,6 +3,7 @@ package co.tddl.mylga
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.tddl.mylga.adapter.FeedsRecyclerviewAdapter
 import co.tddl.mylga.model.Feed
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.fragment_your_feed.*
 
 
@@ -46,6 +49,7 @@ class YourFeed : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        getYourFeeds()
         recyclerView.apply {
             layoutManager = LinearLayoutManager(activity)
             adapter = FeedsRecyclerviewAdapter(feeds)
@@ -56,8 +60,30 @@ class YourFeed : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        getYourFeeds()
+    }
+
     companion object {
         fun newInstance(): YourFeed = YourFeed()
+    }
+
+    private fun getYourFeeds(){
+        val db = FirebaseFirestore.getInstance()
+        val auth = FirebaseAuth.getInstance()
+
+        db.collection("posts")
+            .whereEqualTo("userId", auth.currentUser?.uid.toString())
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    Log.d("Result", "${document.id} => ${document.data}")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.w("Error", "Error getting documents: ", exception)
+            }
     }
 
 
