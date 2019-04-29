@@ -72,7 +72,9 @@ class YourFeed : Fragment() {
         val db = FirebaseFirestore.getInstance()
         val auth = FirebaseAuth.getInstance()
         var name = "User"
-        val docRef = db.collection("users").whereEqualTo("id", auth.currentUser?.uid.toString()).limit(1)//.document(auth.currentUser?.uid.toString())
+        val docRef = db.collection("users")
+                        .whereEqualTo("id", auth.currentUser?.uid.toString())
+                        .limit(1)//.document(auth.currentUser?.uid.toString())
         docRef.get()
             .addOnSuccessListener { document ->
                 if(document.size() == 1){
