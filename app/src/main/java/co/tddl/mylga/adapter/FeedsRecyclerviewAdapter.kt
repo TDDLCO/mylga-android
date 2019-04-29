@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import co.tddl.mylga.R
 import co.tddl.mylga.model.Feed
+import com.squareup.picasso.Picasso
 
 class FeedsRecyclerviewAdapter(private val list: List<Feed>)
     : RecyclerView.Adapter<FeedsRecyclerviewAdapter.FeedViewHolder>() {
@@ -39,7 +40,12 @@ class FeedsRecyclerviewAdapter(private val list: List<Feed>)
         }
 
         fun bind(feed: Feed) {
-            mImageView?.setImageResource(feed.image)
+            // mImageView?.setImageResource(feed.image)
+            Picasso.get()
+                .load(feed.image)
+                .placeholder(R.drawable.tokyo)
+                .error(R.drawable.barcelona)
+                .into(mImageView)
             mDescriptionView?.text = feed.description
             mLocationView?.text = feed.location
         }
