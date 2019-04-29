@@ -7,6 +7,7 @@
 >
 
     <androidx.cardview.widget.CardView
+        android:visibility="gone"
         android:id="@+id/noUpdateCardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -72,6 +73,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars="vertical"
+        android:visibility="gone"
     />
 
 
@@ -87,6 +89,7 @@
             android:layout_margin="20dp"
             android:background="@color/colorPrimary"
             app:backgroundTint="@color/colorPrimary"
+            android:visibility="gone"
     />
 
 </RelativeLayout>

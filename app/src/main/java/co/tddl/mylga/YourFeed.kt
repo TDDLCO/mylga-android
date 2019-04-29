@@ -28,6 +28,7 @@ private const val ARG_PARAM2 = "param2"
  */
 class YourFeed : Fragment() {
 
+    private var fetched = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,10 +87,14 @@ class YourFeed : Fragment() {
                 Log.d("Error", "get failed with ", exception)
             }
 
-        if(feeds.isNullOrEmpty()){
+        if(feeds.isNullOrEmpty() && fetched){
             recyclerView?.visibility = View.GONE
             fab?.visibility = View.GONE
             noUpdateCardView?.visibility = View.VISIBLE
+        }else if(feeds.isNullOrEmpty() && !fetched){
+            recyclerView?.visibility = View.GONE
+            fab?.visibility = View.GONE
+            noUpdateCardView?.visibility = View.GONE
         }else{
             recyclerView?.visibility = View.VISIBLE
             fab?.visibility = View.VISIBLE
@@ -115,6 +120,7 @@ class YourFeed : Fragment() {
                     Log.d("Result", "${document.id} => ${document.data}")
                     feeds.add(Feed(document["imageUrl"].toString(), document["description"].toString(), document["location"].toString()))
                 }
+                fetched = true
                 initRecyclerView(feeds)
             }
             .addOnFailureListener { exception ->
