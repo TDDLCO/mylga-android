@@ -3,7 +3,7 @@ package co.tddl.mylga.networking
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import co.tddl.mylga.BuildConfig
+import co.tddl.mylga.model.Place
 import com.google.gson.JsonObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,9 +23,9 @@ class FetchPlaces {
     val properties: LiveData<JsonObject>
         get() = _properties
 
-    val _navigateToSelectedProperty = MutableLiveData<MapProperty>()
+    val _navigateToSelectedProperty = MutableLiveData<Place>()
 
-    val navigateToSelectedProperty: LiveData<MapProperty>
+    val navigateToSelectedProperty: LiveData<Place>
         get() = _navigateToSelectedProperty
 
 
