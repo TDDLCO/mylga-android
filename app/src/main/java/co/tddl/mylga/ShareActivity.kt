@@ -27,6 +27,7 @@ import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.OnProgressListener
 import co.tddl.mylga.onboarding.MainActivity
 import androidx.annotation.NonNull
+import co.tddl.mylga.networking.FetchPlaces
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
@@ -34,8 +35,6 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.UUID.randomUUID
-
-
 
 
 class ShareActivity : AppCompatActivity() {
@@ -46,6 +45,8 @@ class ShareActivity : AppCompatActivity() {
     private var firebaseStore: FirebaseStorage? = null
     private var storageReference: StorageReference? = null
     private lateinit var auth: FirebaseAuth
+
+    //var tmdbApiKey = BuildConfig.GCP_API_KEY
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +61,8 @@ class ShareActivity : AppCompatActivity() {
 
         btn_upload_image.setOnClickListener { takePictureWithCamera() }
         btn_share_something.setOnClickListener { uploadImage() }
+        val fetchPlaces = FetchPlaces()
+        fetchPlaces.getMapLocationSuggestions("Alexander road", BuildConfig.GCP_API_KEY)
     }
 
     // 1. Launch Intent to Choose picture
