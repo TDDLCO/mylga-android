@@ -18,6 +18,7 @@ import android.os.Build
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.core.content.FileProvider.getUriForFile
@@ -94,6 +95,7 @@ class ShareActivity : AppCompatActivity() {
                 getMapLocationSuggestions(p0.toString(), BuildConfig.GCP_API_KEY)
             }
         })
+        edit_text_location.onItemSelectedListener
 
     }
 
@@ -120,7 +122,7 @@ class ShareActivity : AppCompatActivity() {
             Log.d("CRT", "Launched in coroutine")
             // Get the Deferred object for our Retrofit request
             val getPropertiesDeferred = MapApi.retrofitService.getMatch(input, key)
-            //try {
+            try {
                 _status?.value = MapApiStatus.LOADING
                 // this will run on a thread managed by Retrofit
                 val listResult = getPropertiesDeferred.await()
@@ -129,11 +131,11 @@ class ShareActivity : AppCompatActivity() {
                 Log.d("RESULTS", "DONE")
                 Log.d("RESULTS_data", listResult.toString())
                 parseJson(listResult)
-            /*} catch (e: Exception) {
+            } catch (e: Exception) {
                 _status?.value = MapApiStatus.ERROR
                 _properties?.value = null
                 Log.d("RETURN ERR", e.toString())
-            }*/
+            }
 
         }
     }
@@ -157,7 +159,7 @@ class ShareActivity : AppCompatActivity() {
                     android.R.layout.simple_dropdown_item_1line, places
                 )
 
-                edit_text_location.setAdapter(adapter)
+                edit_text_location?.setAdapter(adapter)
                 edit_text_location.showDropDown()
             }
         }
@@ -233,45 +235,86 @@ class ShareActivity : AppCompatActivity() {
 
     //3. Upload Image to Firebase Storage
     private fun uploadImage(){
-        if(filePath != null){
-            val ref = storageReference?.child("uploads/" + UUID.randomUUID().toString())
-            val uploadTask = ref?.putFile(filePath!!)
-                /*?.addOnSuccessListener { taskSnapshot ->
-                    Toast.makeText(this, "Uploaded ${ref.downloadUrl}", Toast.LENGTH_LONG).show()
-                    location.text = ref.downloadUrl.toString()
-                }
-                ?.addOnFailureListener { e ->
-                    Toast.makeText(this, "Failed " + e.message, Toast.LENGTH_LONG).show()
-                }
-                ?.addOnProgressListener { taskSnapshot ->
-                    Toast.makeText(this, "Uploading... ", Toast.LENGTH_LONG).show()
-                }*/
-
-            val urlTask = uploadTask?.continueWithTask(Continuation<UploadTask.TaskSnapshot, Task<Uri>> { task ->
-                if (!task.isSuccessful) {
-                    task.exception?.let {
-                        throw it
-                    }
-                }
-                return@Continuation ref.downloadUrl
-            })?.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val downloadUri = task.result
-                    //Toast.makeText(this, "Uploaded $downloadUri", Toast.LENGTH_LONG).show()
-                    location.text = downloadUri.toString()
-                    addUploadRecordToDb(downloadUri.toString(), edit_text_location.text.toString(), edit_text_description.text.toString())
-                } else {
-                    // Handle failures
-                    // ...
-                }
-            }?.addOnFailureListener{
-
-            }
-
-
-        }else{
+        if(filePath == null){
             Toast.makeText(this, "Please Upload an Image", Toast.LENGTH_SHORT).show()
+            return
         }
+
+        if(edit_text_description.text.isNullOrEmpty()) {
+            Toast.makeText(this, "Please add a description", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if(edit_text_location.text.isNullOrEmpty()) {
+            Toast.makeText(this, "Please add a location", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        showLoading()
+        val ref = storageReference?.child("uploads/" + UUID.randomUUID().toString())
+        val uploadTask = ref?.putFile(filePath!!)
+            /*?.addOnSuccessListener { taskSnapshot ->
+                Toast.makeText(this, "Uploaded ${ref.downloadUrl}", Toast.LENGTH_LONG).show()
+                location.text = ref.downloadUrl.toString()
+            }
+            ?.addOnFailureListener { e ->
+                Toast.makeText(this, "Failed " + e.message, Toast.LENGTH_LONG).show()
+            }
+            ?.addOnProgressListener { taskSnapshot ->
+                Toast.makeText(this, "Uploading... ", Toast.LENGTH_LONG).show()
+            }*/
+
+        val urlTask = uploadTask?.continueWithTask(Continuation<UploadTask.TaskSnapshot, Task<Uri>> { task ->
+            if (!task.isSuccessful) {
+                task.exception?.let {
+                    throw it
+                }
+            }
+            return@Continuation ref.downloadUrl
+        })?.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val downloadUri = task.result
+                addUploadRecordToDb(downloadUri.toString(), edit_text_location.text.toString(), edit_text_description.text.toString())
+            } else {
+                // Handle failures
+                // ...
+            }
+        }?.addOnFailureListener{
+
+        }
+    }
+
+    private fun showLoading(){
+        progress_bar.visibility = View.VISIBLE
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            edit_text_description.focusable = View.NOT_FOCUSABLE
+            edit_text_location.focusable = View.NOT_FOCUSABLE
+        }
+        edit_text_description.isEnabled = false
+        edit_text_location.isEnabled = false
+        btn_share_something.text = "Posting"
+        btn_upload_image.visibility = View.GONE
+    }
+
+    private fun hideLoading(){
+        progress_bar.visibility = View.GONE
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            edit_text_description.focusable = View.FOCUSABLE
+            edit_text_location.focusable = View.FOCUSABLE
+        }
+        edit_text_description.isEnabled = true
+        edit_text_location.isEnabled = true
+        btn_share_something.text = "Post"
+        btn_upload_image.visibility = View.VISIBLE
+
+        clearInputs()
+    }
+
+    private fun clearInputs(){
+        edit_text_description.setText("")
+        edit_text_location.setText("")
+        uploadImage.setImageResource(R.drawable.ic_image_gray_40dp)
+
     }
 
     private fun addUploadRecordToDb(uri: String, location: String, description: String ){
@@ -286,9 +329,11 @@ class ShareActivity : AppCompatActivity() {
         db.collection("posts")
             .add(data)
             .addOnSuccessListener { documentReference ->
+                hideLoading()
                 Toast.makeText(this, "Saved to DB", Toast.LENGTH_LONG).show()
             }
             .addOnFailureListener { e ->
+                hideLoading()
                 Toast.makeText(this, "Error saving to DB", Toast.LENGTH_LONG).show()
             }
     }
