@@ -15,6 +15,10 @@ import android.content.ClipData
 import android.content.ClipDescription
 import android.net.Uri
 import android.os.Build
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.core.content.FileProvider.getUriForFile
 import com.google.firebase.storage.FirebaseStorage
@@ -27,13 +31,23 @@ import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.OnProgressListener
 import co.tddl.mylga.onboarding.MainActivity
 import androidx.annotation.NonNull
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import co.tddl.mylga.networking.FetchPlaces
+import co.tddl.mylga.networking.MapApi
+import co.tddl.mylga.networking.MapApiStatus
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.util.UUID.randomUUID
 
 
@@ -45,8 +59,10 @@ class ShareActivity : AppCompatActivity() {
     private var firebaseStore: FirebaseStorage? = null
     private var storageReference: StorageReference? = null
     private lateinit var auth: FirebaseAuth
-
-    //var tmdbApiKey = BuildConfig.GCP_API_KEY
+    private lateinit var viewModelJob: Job
+    private lateinit var coroutineScope: CoroutineScope
+    private var _status: MutableLiveData<MapApiStatus>? = null
+    private var _properties: MutableLiveData<JsonObject>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,15 +70,31 @@ class ShareActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        //get firebase product instances
+        //get instances
         firebaseStore = FirebaseStorage.getInstance()
         storageReference = FirebaseStorage.getInstance().reference
         auth = FirebaseAuth.getInstance()
+        viewModelJob = Job()
+        coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
+
+        _status = MutableLiveData<MapApiStatus>()
+        _properties = MutableLiveData<JsonObject>()
 
         btn_upload_image.setOnClickListener { takePictureWithCamera() }
         btn_share_something.setOnClickListener { uploadImage() }
-        val fetchPlaces = FetchPlaces()
-        fetchPlaces.getMapLocationSuggestions("Alexander road", BuildConfig.GCP_API_KEY)
+        edit_text_location.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                // Log.d("Changed", p0.toString()
+                getMapLocationSuggestions(p0.toString(), BuildConfig.GCP_API_KEY)
+            }
+        })
+
     }
 
     // 1. Launch Intent to Choose picture
@@ -80,6 +112,56 @@ class ShareActivity : AppCompatActivity() {
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
             }
         }
+    }
+
+    private fun getMapLocationSuggestions(input: String, key: String) {
+        Log.d("CRT", "Launched")
+        coroutineScope.launch {
+            Log.d("CRT", "Launched in coroutine")
+            // Get the Deferred object for our Retrofit request
+            val getPropertiesDeferred = MapApi.retrofitService.getMatch(input, key)
+            //try {
+                _status?.value = MapApiStatus.LOADING
+                // this will run on a thread managed by Retrofit
+                val listResult = getPropertiesDeferred.await()
+                _status?.value = MapApiStatus.DONE
+                _properties?.value = listResult
+                Log.d("RESULTS", "DONE")
+                Log.d("RESULTS_data", listResult.toString())
+                parseJson(listResult)
+            /*} catch (e: Exception) {
+                _status?.value = MapApiStatus.ERROR
+                _properties?.value = null
+                Log.d("RETURN ERR", e.toString())
+            }*/
+
+        }
+    }
+
+    fun parseJson(jsonObject: JsonObject){
+
+        if(jsonObject != null) {
+            val jsonArray = jsonObject.getAsJsonArray("predictions")
+            Log.d("RESULTS_data_array", jsonArray.toString())
+            val places = arrayListOf<String>()
+            for (i in 0..(jsonArray.size() - 1)) {
+                val item = jsonArray.get(i)
+                places.add(item.asJsonObject.get("description").asString)
+                // Your code here
+            }
+
+            runOnUiThread {
+                places.toArray()
+                val adapter = ArrayAdapter<String>(
+                    this,
+                    android.R.layout.simple_dropdown_item_1line, places
+                )
+
+                edit_text_location.setAdapter(adapter)
+                edit_text_location.showDropDown()
+            }
+        }
+
     }
 
     @SuppressLint("SimpleDateFormat")
