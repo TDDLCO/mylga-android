@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import com.google.android.material.navigation.NavigationView
 import androidx.core.view.GravityCompat
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -15,7 +14,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_home.*
@@ -25,21 +23,25 @@ import androidx.viewpager.widget.ViewPager
 import co.tddl.mylga.adapter.TabPagerAdapter
 import co.tddl.mylga.location.GeocoderHelper
 import co.tddl.mylga.location.MY_PERMISSIONS_REQUEST_LOCATION
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.api.GoogleApiClient
+import co.tddl.mylga.util.SharedPreferenceHelper
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-
 
 class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener{
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var geocoderHelper: GeocoderHelper
+    private lateinit var sharedPref:SharedPreferenceHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         setSupportActionBar(toolbar)
         toolbar.title = "Home"
+
+        geocoderHelper = GeocoderHelper()
+        sharedPref = SharedPreferenceHelper(this)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         val toggle = ActionBarDrawerToggle(
             this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
@@ -63,17 +65,19 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 viewPager.currentItem = tab.position
             }
 
-            override fun onTabUnselected(tab: TabLayout.Tab) {
+            override fun onTabUnselected(tab: TabLayout.Tab) {}
 
-            }
-
-            override fun onTabReselected(tab: TabLayout.Tab) {
-
-            }
+            override fun onTabReselected(tab: TabLayout.Tab) {}
         })
 
-        val headerView = nav_view.getHeaderView(0)
 
+        addClickListeners()
+        checkLocationPermission()
+
+    }
+
+    private fun addClickListeners(){
+        val headerView = nav_view.getHeaderView(0)
         val profilell = headerView.findViewById<LinearLayout>(R.id.profile_linear_layout)
         val settingsiv = headerView.findViewById<ImageView>(R.id.image_view_settings)
 
@@ -85,46 +89,42 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val intent = Intent(applicationContext, SettingsActivity::class.java)
             startActivity(intent)
         }
+    }
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location: Location? ->
-                    // Got last known location. In some rare situations this can be null.
-                    if (location == null) {
-                        Log.v("NULL LOC", "Location is null/")
-                    }
-                    Log.v("NOT NULL LOC", "$location")
-                    Toast.makeText(this, "$location", Toast.LENGTH_LONG).show()
-                    //location?.toString()
-
-                }
+    private fun checkLocationPermission(){
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if(sharedPref.lastLocationUpdatedOverOneDay()) {
+                // try and get location if its been two days since the user updated locatiob
+                getLocationAddress()
+            }
         }else{
             // Request for permission
             ActivityCompat.requestPermissions(this,
-                arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
-                MY_PERMISSIONS_REQUEST_LOCATION)
+                arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), MY_PERMISSIONS_REQUEST_LOCATION)
         }
     }
 
     @SuppressLint("MissingPermission")
-    fun getLocationAddress(){
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                // Got last known location. In some rare situations this can be null.
-                if (location != null) {
-                    val geocoderHelper = GeocoderHelper()
-                    val address = geocoderHelper.getAddressFromLocation(location.latitude, location.longitude, applicationContext)
-                    // Save address in shared preferences
-                }
-
+    private fun getLocationAddress(){
+        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+            // Got last known location. In some rare situations this can be null.
+            if (location != null) {
+                val geocoderHelper = GeocoderHelper()
+                val address = geocoderHelper.getAddressFromLocation(location.latitude, location.longitude, applicationContext)
+                // Save address in shared preferences
+                val sharedPreferenceHelper = SharedPreferenceHelper(this)
+                sharedPreferenceHelper.setLastLocation(address)
             }
+
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if(requestCode == MY_PERMISSIONS_REQUEST_LOCATION){
+        if(requestCode == MY_PERMISSIONS_REQUEST_LOCATION && grantResults[0] == PackageManager.PERMISSION_GRANTED){
             // save location in preference
+            getLocationAddress()
         }
     }
 
@@ -148,13 +148,12 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-     override fun onNavigationItemSelected(item: MenuItem): Boolean {
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         when (item.itemId) {
             /*R.id.nav_camera -> {
             }*/
         }
-
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }

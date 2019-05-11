@@ -2,6 +2,9 @@ package co.tddl.mylga.util
 
 import android.content.Context
 import android.content.SharedPreferences
+import java.util.*
+import java.util.concurrent.TimeUnit
+
 
 class SharedPreferenceHelper(val context: Context) {
 
@@ -45,12 +48,44 @@ class SharedPreferenceHelper(val context: Context) {
     /**
      * Sets true for location granted preference
      */
-    fun setLastLocation(location: String){
+    fun setLastLocation(location: String?){
         val editor: SharedPreferences.Editor = sharedPref.edit()
         editor.putString(SharedPreferenceContract.PREF_LAST_LOCATION, location)
+        setLastLocationUpdatedAt(editor)
         editor.apply()
     }
 
+    /**
+     * Gets the value of last location in preference file
+     */
+    fun getLastLocation(): String?{
+        if(sharedPref.contains(SharedPreferenceContract.PREF_LAST_LOCATION)){
+            return sharedPref.getString(SharedPreferenceContract.PREF_LAST_LOCATION, null)
+        }
+        return null
+    }
+
+    /**
+     * Sets true for location granted preference
+     */
+    private fun setLastLocationUpdatedAt(editor: SharedPreferences.Editor){
+        val date = Date(System.currentTimeMillis())
+        editor.putLong(SharedPreferenceContract.PREF_LAST_LOCATION_UPDATED_AT, date.time)
+    }
+
+    fun lastLocationUpdatedOverOneDay(): Boolean{
+
+        if(sharedPref.contains(SharedPreferenceContract.PREF_LAST_LOCATION_UPDATED_AT)){
+            val dateTime = sharedPref.getLong(SharedPreferenceContract.PREF_LAST_LOCATION_UPDATED_AT, 0)
+
+            val today = Date(System.currentTimeMillis()).time
+
+            val timeDifference = Math.abs(TimeUnit.MILLISECONDS.toDays(dateTime - today))
+
+            return timeDifference > 1
+        }
+        return true
+    }
 
     /**
      * Unsets the username.
