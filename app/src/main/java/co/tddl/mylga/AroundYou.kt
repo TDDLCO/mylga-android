@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.tddl.mylga.adapter.UpdateRecyclerviewAdapter
 import co.tddl.mylga.model.Update
+import co.tddl.mylga.util.SharedPreferenceHelper
 import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.fragment_around_you.*
 
@@ -54,14 +55,40 @@ class AroundYou : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recyclerView.apply {
+        aroundFeedRecyclerView.apply {
             layoutManager = LinearLayoutManager(activity)
             adapter = UpdateRecyclerviewAdapter(updates)
         }
+
+        fetchFeedsAroundYou()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        fetchFeedsAroundYou()
     }
 
     companion object {
         fun newInstance(): YourFeed = YourFeed()
+    }
+
+    private fun initRecyclerView(){
+
+    }
+
+    private fun fetchFeedsAroundYou(){
+        //1. Check pref to see if location exists
+        //2. If location is null, show card, hide recyclerview and change text appropriately
+
+        val sharedPreferenceHelper = SharedPreferenceHelper(context)
+        if(sharedPreferenceHelper.getLastLocation() == null){
+            noAroundFeedCardView.visibility = View.VISIBLE
+            aroundFeedRecyclerView.visibility = View.GONE
+            text_view_around_feed_msg.text = getString(R.string.text_enable_location)
+            return
+        }
+
+        // do else here - fetch data from firebase and perform magic!
     }
 
 

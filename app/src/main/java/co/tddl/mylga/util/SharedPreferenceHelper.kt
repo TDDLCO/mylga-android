@@ -6,9 +6,9 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 
-class SharedPreferenceHelper(val context: Context) {
+class SharedPreferenceHelper(val context: Context?) {
 
-    private val sharedPref: SharedPreferences = context.getSharedPreferences(SharedPreferenceContract.PREF_APP_NAME, Context.MODE_PRIVATE)
+    private val sharedPref: SharedPreferences = context!!.getSharedPreferences(SharedPreferenceContract.PREF_APP_NAME, Context.MODE_PRIVATE)
 
     /**
      * Checks if user has installed the application before.
