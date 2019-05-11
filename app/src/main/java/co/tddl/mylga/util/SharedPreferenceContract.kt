@@ -9,6 +9,7 @@ class SharedPreferenceContract {
 
         const val PREF_LOGGED_IN = "PREF_LOGGED_IN"
         const val PREF_USER_NAME = "PREF_USER_NAME"
+        const val PREF_LOCATION_GRANTED = "PREF_LOCATION_GRANTED"
         const val PREF_PROFILE_PICTURE = "PREF_PROFILE_PICTURE"
         const val PREF_LOCATION = "PREF_LOCATION"
     }

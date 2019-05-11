@@ -330,11 +330,11 @@ class ShareActivity : AppCompatActivity() {
             .add(data)
             .addOnSuccessListener { documentReference ->
                 hideLoading()
-                Toast.makeText(this, "Saved to DB", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Post shared", Toast.LENGTH_LONG).show()
             }
             .addOnFailureListener { e ->
                 hideLoading()
-                Toast.makeText(this, "Error saving to DB", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Error sharing post", Toast.LENGTH_LONG).show()
             }
     }
 
