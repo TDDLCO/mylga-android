@@ -45,20 +45,12 @@ class SharedPreferenceHelper(val context: Context) {
     /**
      * Sets true for location granted preference
      */
-    fun setLocationGranted(){
+    fun setLastLocation(location: String){
         val editor: SharedPreferences.Editor = sharedPref.edit()
-        editor.putBoolean(SharedPreferenceContract.PREF_LOCATION_GRANTED, true)
+        editor.putString(SharedPreferenceContract.PREF_LAST_LOCATION, location)
         editor.apply()
     }
 
-    /**
-     * Sets false for location granted preference
-     */
-    fun unsetLocationGranted(){
-        val editor: SharedPreferences.Editor = sharedPref.edit()
-        editor.putBoolean(SharedPreferenceContract.PREF_LOCATION_GRANTED, false)
-        editor.apply()
-    }
 
     /**
      * Unsets the username.

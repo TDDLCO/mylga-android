@@ -1,7 +1,7 @@
 package co.tddl.mylga
 
 import android.Manifest
-import android.app.Activity
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
@@ -23,25 +23,17 @@ import kotlinx.android.synthetic.main.app_bar_home.*
 import com.google.android.material.tabs.TabLayout
 import androidx.viewpager.widget.ViewPager
 import co.tddl.mylga.adapter.TabPagerAdapter
-import co.tddl.mylga.location.LocationAddress
+import co.tddl.mylga.location.GeocoderHelper
+import co.tddl.mylga.location.MY_PERMISSIONS_REQUEST_LOCATION
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
-import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
 
-class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    override fun onConnected(p0: Bundle?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener{
 
-    override fun onConnectionSuspended(p0: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    private val MY_PERMISSIONS_REQUEST_LOCATION = 11
-    private val UPDATE_INTERVAL = (2 * 1000).toLong()  /* 10 secs */
-    private val FASTEST_INTERVAL: Long = 2000 /* 2 sec */
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,7 +86,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             startActivity(intent)
         }
 
-        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
@@ -113,16 +105,27 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
                 MY_PERMISSIONS_REQUEST_LOCATION)
         }
-
-        val la = LocationAddress()
-        val address = la.getAddressFromLocation(37.42205, -122.084095, applicationContext, null)
-        Toast.makeText(this, "$address", Toast.LENGTH_LONG).show()
-
-
     }
 
-    override fun onConnectionFailed(connectionResult: ConnectionResult) {
-        Log.i("FAILED", "Connection failed. Error: " + connectionResult.getErrorCode());
+    @SuppressLint("MissingPermission")
+    fun getLocationAddress(){
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                // Got last known location. In some rare situations this can be null.
+                if (location != null) {
+                    val geocoderHelper = GeocoderHelper()
+                    val address = geocoderHelper.getAddressFromLocation(location.latitude, location.longitude, applicationContext)
+                    // Save address in shared preferences
+                }
+
+            }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if(requestCode == MY_PERMISSIONS_REQUEST_LOCATION){
+            // save location in preference
+        }
     }
 
     override fun onBackPressed() {
@@ -134,42 +137,22 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.home, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         when (item.itemId) {
             R.id.action_settings -> return true
             else -> return super.onOptionsItemSelected(item)
         }
     }
 
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         when (item.itemId) {
-            R.id.nav_camera -> {
-                // Handle the camera action
-            }
-            R.id.nav_gallery -> {
-
-            }
-            R.id.nav_slideshow -> {
-
-            }
-            R.id.nav_manage -> {
-
-            }
-            R.id.nav_share -> {
-
-            }
-            R.id.nav_send -> {
-
-            }
+            /*R.id.nav_camera -> {
+            }*/
         }
 
         drawer_layout.closeDrawer(GravityCompat.START)
