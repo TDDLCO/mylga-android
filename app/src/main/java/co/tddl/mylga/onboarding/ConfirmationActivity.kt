@@ -56,7 +56,7 @@ class ConfirmationActivity : AppCompatActivity() {
                 if(documents.isEmpty){
                     // document does not exist
                     //  create record
-                    db.collection("cities")
+                    db.collection("users")
                         .add(user)
                         .addOnSuccessListener { documentReference ->
                             Toast.makeText(applicationContext, "Done", Toast.LENGTH_LONG).show()

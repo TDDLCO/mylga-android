@@ -20,7 +20,11 @@ import co.tddl.mylga.adapter.UpdateRecyclerviewAdapter
 import co.tddl.mylga.model.Update
 import co.tddl.mylga.util.SharedPreferenceHelper
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.android.synthetic.main.fragment_around_you.*
+import kotlinx.android.synthetic.main.fragment_your_feed.*
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -81,14 +85,37 @@ class AroundYou : Fragment() {
         //2. If location is null, show card, hide recyclerview and change text appropriately
 
         val sharedPreferenceHelper = SharedPreferenceHelper(context)
-        if(sharedPreferenceHelper.getLastLocation() == null){
+        val lastLocation: String? = sharedPreferenceHelper.getLastLocation()
+
+
+        if(lastLocation == null){
             noAroundFeedCardView.visibility = View.VISIBLE
             aroundFeedRecyclerView.visibility = View.GONE
             text_view_around_feed_msg.text = getString(R.string.text_enable_location)
-            return
+            //return
         }
 
         // do else here - fetch data from firebase and perform magic!
+        val db = FirebaseFirestore.getInstance()
+
+        db.collection("posts")
+        .whereArrayContains("terms", "$lastLocation")
+        .addSnapshotListener(EventListener<QuerySnapshot> { value, e ->
+            if (e != null) {
+                Log.w("FAILED", "Listen failed.", e)
+                return@EventListener
+            }
+
+            Log.v("VALUE_SIZE", value?.size().toString())
+
+            //val cities = ArrayList<String>()
+            for (doc in value!!) {
+                if (doc.getString("location") != null) {
+                    Log.v("IN_LAGOS", doc.getString("location"))
+                    // cities.add(doc.getString("name")!!)
+                }
+            }
+        })
     }
 
 

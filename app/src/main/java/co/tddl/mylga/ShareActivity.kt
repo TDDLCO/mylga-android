@@ -321,10 +321,18 @@ class ShareActivity : AppCompatActivity() {
         val db = FirebaseFirestore.getInstance()
 
         val data = HashMap<String, Any>()
+
+        val terms = location.split(",")
+        val trimmedTerms = arrayListOf<String>()
+        terms.forEach {term ->
+            trimmedTerms.add(term.trim())
+        }
+
         data["userId"] = auth.currentUser?.uid.toString()
         data["imageUrl"] = uri
         data["location"] = location
         data["description"] = description
+        data["terms"] = trimmedTerms
 
         db.collection("posts")
             .add(data)
