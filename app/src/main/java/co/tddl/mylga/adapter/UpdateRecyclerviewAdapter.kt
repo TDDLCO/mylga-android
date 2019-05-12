@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import co.tddl.mylga.R
 import co.tddl.mylga.model.Update
+import com.squareup.picasso.Picasso
 
 class UpdateRecyclerviewAdapter(private val list: List<Update>)
     : RecyclerView.Adapter<UpdateRecyclerviewAdapter.FeedViewHolder>() {
@@ -40,7 +41,11 @@ class UpdateRecyclerviewAdapter(private val list: List<Update>)
         }
 
         fun bind(update: Update) {
-            mImageView?.setImageResource(update.image)
+            Picasso.get()
+                .load(update.image)
+                .placeholder(R.drawable.tokyo)
+                .error(R.drawable.barcelona)
+                .into(mImageView)
             mDescriptionView?.text = update.description
             mLocationView?.text = update.location
             mAuthorView?.text = update.author

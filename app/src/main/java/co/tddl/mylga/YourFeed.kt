@@ -45,7 +45,7 @@ class YourFeed : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        getYourFeeds()
+        // getYourFeeds()
 
         fab.visibility = View.GONE
 

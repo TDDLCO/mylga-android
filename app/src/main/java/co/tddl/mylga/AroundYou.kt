@@ -1,47 +1,23 @@
 package co.tddl.mylga
 
-
-import android.Manifest
-import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.tddl.mylga.adapter.UpdateRecyclerviewAdapter
 import co.tddl.mylga.model.Update
 import co.tddl.mylga.util.SharedPreferenceHelper
-import com.google.android.gms.location.LocationServices
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.android.synthetic.main.fragment_around_you.*
-import kotlinx.android.synthetic.main.fragment_your_feed.*
 
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- *
- */
 class AroundYou : Fragment() {
-
-    private val updates = listOf(
-        Update(R.drawable.tokyo, "The Tokyo view", "Emeka Mordi", "Tokyo, Japan"),
-        Update(R.drawable.barcelona, "Barcelona babyyyyyyy", "Emeka Mordi", "Barcelona")
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,12 +35,8 @@ class AroundYou : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        aroundFeedRecyclerView.apply {
-            layoutManager = LinearLayoutManager(activity)
-            adapter = UpdateRecyclerviewAdapter(updates)
-        }
-
-        fetchFeedsAroundYou()
+        initRecyclerView()
+        // fetchFeedsAroundYou()
     }
 
     override fun onResume() {
@@ -84,6 +56,7 @@ class AroundYou : Fragment() {
         //1. Check pref to see if location exists
         //2. If location is null, show card, hide recyclerview and change text appropriately
 
+        val updates = arrayListOf<Update>()
         val sharedPreferenceHelper = SharedPreferenceHelper(context)
         val lastLocation: String? = sharedPreferenceHelper.getLastLocation()
 
@@ -92,7 +65,7 @@ class AroundYou : Fragment() {
             noAroundFeedCardView.visibility = View.VISIBLE
             aroundFeedRecyclerView.visibility = View.GONE
             text_view_around_feed_msg.text = getString(R.string.text_enable_location)
-            //return
+            return
         }
 
         // do else here - fetch data from firebase and perform magic!
@@ -106,14 +79,14 @@ class AroundYou : Fragment() {
                 return@EventListener
             }
 
-            Log.v("VALUE_SIZE", value?.size().toString())
+            for (document in value!!) {
+                Log.d("Result", "${document.id} => ${document.data}")
+                updates.add(Update(document["imageUrl"].toString(), document["description"].toString(), "", document["location"].toString()))
+            }
 
-            //val cities = ArrayList<String>()
-            for (doc in value!!) {
-                if (doc.getString("location") != null) {
-                    Log.v("IN_LAGOS", doc.getString("location"))
-                    // cities.add(doc.getString("name")!!)
-                }
+            aroundFeedRecyclerView.apply {
+                layoutManager = LinearLayoutManager(activity)
+                adapter = UpdateRecyclerviewAdapter(updates)
             }
         })
     }
