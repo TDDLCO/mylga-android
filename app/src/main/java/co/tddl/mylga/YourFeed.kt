@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import co.tddl.mylga.adapter.FeedsRecyclerviewAdapter
 import co.tddl.mylga.model.Feed
 import com.google.firebase.auth.FirebaseAuth
@@ -118,7 +119,7 @@ class YourFeed : Fragment() {
             .addOnSuccessListener { documents ->
                 for (document in documents) {
                     Log.d("Result", "${document.id} => ${document.data}")
-                    feeds.add(Feed(document["imageUrl"].toString(), document["description"].toString(), document["location"].toString()))
+                    feeds.add(Feed(document.id, document["imageUrl"].toString(), document["description"].toString(), document["location"].toString()))
                 }
                 fetched = true
                 initRecyclerView(feeds)
