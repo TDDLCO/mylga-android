@@ -62,7 +62,7 @@ class FeedsRecyclerviewAdapter(private val list: MutableList<Feed>, private val 
             .addOnSuccessListener {
                 Log.d(TAG, "DocumentSnapshot successfully deleted!")
                 // delete image from storage
-                deleteImageFromStorage(feed.image)
+                deleteImageFromStorage(feed.pathString)
             }
             .addOnFailureListener { e -> Log.w(TAG, "Error deleting document", e) }
     }

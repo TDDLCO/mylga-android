@@ -121,7 +121,7 @@ class YourFeed : Fragment() {
             .addOnSuccessListener { documents ->
                 for (document in documents) {
                     val createdAt = timeAgoHelper.getTimeAgo(document["createdAt"].toString().toLong())
-                    feeds.add(Feed(document.id, document["imageUrl"].toString(), document["description"].toString(), document["location"].toString(), createdAt))
+                    feeds.add(Feed(document.id, document["imageUrl"].toString(), document["description"].toString(), document["location"].toString(), createdAt, document["pathString"].toString()))
                 }
                 fetched = true
                 initRecyclerView(feeds)

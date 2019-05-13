@@ -251,7 +251,8 @@ class ShareActivity : AppCompatActivity() {
         }
 
         showLoading()
-        val ref = storageReference?.child("uploads/" + UUID.randomUUID().toString())
+        val pathString = "uploads/${UUID.randomUUID()}"
+        val ref = storageReference?.child(pathString)
         val uploadTask = ref?.putFile(filePath!!)
             /*?.addOnSuccessListener { taskSnapshot ->
                 Toast.makeText(this, "Uploaded ${ref.downloadUrl}", Toast.LENGTH_LONG).show()
@@ -274,7 +275,7 @@ class ShareActivity : AppCompatActivity() {
         })?.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val downloadUri = task.result
-                addUploadRecordToDb(downloadUri.toString(), edit_text_location.text.toString(), edit_text_description.text.toString())
+                addUploadRecordToDb(pathString, downloadUri.toString(), edit_text_location.text.toString(), edit_text_description.text.toString())
             } else {
                 // Handle failures
                 // ...
@@ -317,7 +318,7 @@ class ShareActivity : AppCompatActivity() {
 
     }
 
-    private fun addUploadRecordToDb(uri: String, location: String, description: String ){
+    private fun addUploadRecordToDb(pathString: String, uri: String, location: String, description: String ){
         val db = FirebaseFirestore.getInstance()
 
         val data = HashMap<String, Any>()
@@ -334,6 +335,7 @@ class ShareActivity : AppCompatActivity() {
         data["description"] = description
         data["terms"] = trimmedTerms
         data["createdAt"] = System.currentTimeMillis()
+        data["pathString"] =  pathString
 
         db.collection("posts")
             .add(data)
