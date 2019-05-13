@@ -9,6 +9,14 @@
               android:paddingStart="20dp"
               android:paddingEnd="20dp"
 >
+    <ImageView
+            android:id="@+id/image_view_see_more"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_more_black_24dp"
+            android:layout_gravity="right"
+    />
 
     <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -19,12 +27,11 @@
     >
 
         <ImageView
-                android:id="@+id/image_view_feed"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:src="@drawable/barcelona"
-
+            android:id="@+id/image_view_feed"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/barcelona"
         />
     </androidx.cardview.widget.CardView>
 

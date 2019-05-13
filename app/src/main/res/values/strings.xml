@@ -30,4 +30,5 @@
     <string name="facebook_app_id">788910464829164</string>
     <string name="fb_login_protocol_scheme">fb788910464829164</string>
     <string name="text_enable_location">You need to enable locations to see what happens around you</string>
+    <string name="txt_delete">Delete</string>
 </resources>

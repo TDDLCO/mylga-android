@@ -43,8 +43,8 @@ class UpdateRecyclerviewAdapter(private val list: List<Update>)
         fun bind(update: Update) {
             Picasso.get()
                 .load(update.image)
-                .placeholder(R.drawable.tokyo)
-                .error(R.drawable.barcelona)
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.placeholder)
                 .into(mImageView)
             mDescriptionView?.text = update.description
             mLocationView?.text = update.location

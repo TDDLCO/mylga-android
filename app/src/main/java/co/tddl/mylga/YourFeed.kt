@@ -102,7 +102,7 @@ class YourFeed : Fragment() {
 
             recyclerView?.apply {
                 layoutManager = LinearLayoutManager(activity)
-                adapter = FeedsRecyclerviewAdapter(feeds)
+                adapter = FeedsRecyclerviewAdapter(feeds, context)
             }
         }
     }
