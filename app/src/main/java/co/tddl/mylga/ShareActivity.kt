@@ -333,6 +333,7 @@ class ShareActivity : AppCompatActivity() {
         data["location"] = location
         data["description"] = description
         data["terms"] = trimmedTerms
+        data["createdAt"] = System.currentTimeMillis()
 
         db.collection("posts")
             .add(data)

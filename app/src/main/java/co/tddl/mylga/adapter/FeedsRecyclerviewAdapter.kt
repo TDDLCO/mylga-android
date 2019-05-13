@@ -28,7 +28,7 @@ class FeedsRecyclerviewAdapter(private val list: MutableList<Feed>, private val 
 
     override fun onBindViewHolder(holder: FeedViewHolder, position: Int) {
         val feed: Feed = list[position]
-        holder.bind(feed, position)
+        holder.bind(feed)
         holder.mImageViewSeeMore?.setOnClickListener { showMenu(position, holder) }
     }
 
@@ -85,6 +85,7 @@ class FeedsRecyclerviewAdapter(private val list: MutableList<Feed>, private val 
         private var mImageView: ImageView? = null
         private var mDescriptionView: TextView? = null
         private var mLocationView: TextView? = null
+        private var mTextViewTimeAgo: TextView? = null
         var mImageViewSeeMore: ImageView? = null
 
         init {
@@ -93,9 +94,10 @@ class FeedsRecyclerviewAdapter(private val list: MutableList<Feed>, private val 
             mDescriptionView = itemView.findViewById(R.id.text_view_description)
             mLocationView = itemView.findViewById(R.id.text_view_location)
             mImageViewSeeMore = itemView.findViewById(R.id.image_view_see_more)
+            mTextViewTimeAgo = itemView.findViewById(R.id.text_view_time_ago)
         }
 
-        fun bind(feed: Feed, position: Int) {
+        fun bind(feed: Feed) {
             Picasso.get()
                 .load(feed.image)
                 .placeholder(R.drawable.placeholder)
@@ -103,6 +105,7 @@ class FeedsRecyclerviewAdapter(private val list: MutableList<Feed>, private val 
                 .into(mImageView)
             mDescriptionView?.text = feed.description
             mLocationView?.text = feed.location
+            mTextViewTimeAgo?.text = feed.createdAt
         }
     }
 }
