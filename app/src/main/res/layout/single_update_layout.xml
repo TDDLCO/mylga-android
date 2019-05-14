@@ -10,6 +10,32 @@
               android:paddingEnd="20dp"
 >
 
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+    >
+
+        <TextView
+                android:id="@+id/text_view_author"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Emeka Mordi"
+                android:textSize="15sp"
+                android:layout_marginBottom="7dp"
+        />
+
+        <TextView
+                android:id="@+id/text_view_time_ago"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4 hours ago"
+                android:textSize="15sp"
+                android:layout_alignParentEnd="true"
+        />
+
+    </RelativeLayout>
+
     <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="200dp"
@@ -36,15 +62,6 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginTop="10dp"
-            android:layout_marginBottom="7dp"
-    />
-
-    <TextView
-            android:id="@+id/text_view_author"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Emeka Mordi"
-            android:textSize="15sp"
             android:layout_marginBottom="7dp"
     />
 

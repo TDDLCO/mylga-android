@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import co.tddl.mylga.adapter.UpdateRecyclerviewAdapter
 import co.tddl.mylga.model.Update
 import co.tddl.mylga.util.SharedPreferenceHelper
+import co.tddl.mylga.util.TimeAgoHelper
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
@@ -60,7 +61,6 @@ class AroundYou : Fragment() {
         val sharedPreferenceHelper = SharedPreferenceHelper(context)
         val lastLocation: String? = sharedPreferenceHelper.getLastLocation()
 
-
         if(lastLocation == null){
             noAroundFeedCardView.visibility = View.VISIBLE
             aroundFeedRecyclerView.visibility = View.GONE
@@ -70,6 +70,7 @@ class AroundYou : Fragment() {
 
         // do else here - fetch data from firebase and perform magic!
         val db = FirebaseFirestore.getInstance()
+        val timeAgoHelper = TimeAgoHelper()
 
         db.collection("posts")
         .whereArrayContains("terms", "$lastLocation")
@@ -81,7 +82,8 @@ class AroundYou : Fragment() {
 
             for (document in value!!) {
                 Log.d("Result", "${document.id} => ${document.data}")
-                updates.add(Update(document["imageUrl"].toString(), document["description"].toString(), "", document["location"].toString()))
+                val createdAt = timeAgoHelper.getTimeAgo(document["createdAt"].toString().toLong())
+                updates.add(Update(document["imageUrl"].toString(), document["description"].toString(), document["userId"].toString(), document["location"].toString(), createdAt))
             }
 
             aroundFeedRecyclerView.apply {

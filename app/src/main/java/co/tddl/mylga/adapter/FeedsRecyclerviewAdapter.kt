@@ -3,7 +3,6 @@ package co.tddl.mylga.adapter
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
@@ -14,7 +13,6 @@ import co.tddl.mylga.model.Feed
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.squareup.picasso.Picasso
-import co.tddl.mylga.adapter.FeedsRecyclerviewAdapter.OnNotifyDataSetChanged
 
 
 

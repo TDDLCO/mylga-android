@@ -338,15 +338,15 @@ class ShareActivity : AppCompatActivity() {
         data["pathString"] =  pathString
 
         db.collection("posts")
-            .add(data)
-            .addOnSuccessListener { documentReference ->
-                hideLoading()
-                Toast.makeText(this, "Post shared", Toast.LENGTH_LONG).show()
-            }
-            .addOnFailureListener { e ->
-                hideLoading()
-                Toast.makeText(this, "Error sharing post", Toast.LENGTH_LONG).show()
-            }
+        .add(data)
+        .addOnSuccessListener { documentReference ->
+            hideLoading()
+            Toast.makeText(this, "Post shared", Toast.LENGTH_LONG).show()
+        }
+        .addOnFailureListener { e ->
+            hideLoading()
+            Toast.makeText(this, "Error sharing post", Toast.LENGTH_LONG).show()
+        }
     }
 
 }
