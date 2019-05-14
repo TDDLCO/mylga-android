@@ -6,11 +6,11 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import com.google.android.material.navigation.NavigationView
 import androidx.core.view.GravityCompat
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -26,6 +26,9 @@ import co.tddl.mylga.location.MY_PERMISSIONS_REQUEST_LOCATION
 import co.tddl.mylga.util.SharedPreferenceHelper
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.android.synthetic.main.nav_header_home.*
 
 class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener{
 
@@ -73,7 +76,24 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         addClickListeners()
         checkLocationPermission()
+        getUserDetails()
 
+    }
+
+    private fun getUserDetails(){
+        val auth = FirebaseAuth.getInstance()
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users")
+            .whereEqualTo("id", auth.currentUser?.uid.toString())
+            .get()
+            .addOnSuccessListener { documents ->
+                val username = documents.first()["name"].toString()
+                text_view_user_name.text = username
+                text_view_email.text = auth.currentUser?.email
+            }
+            .addOnFailureListener { exception ->
+                Log.w("Error", "Error getting documents: ", exception)
+            }
     }
 
     private fun addClickListeners(){
@@ -133,18 +153,6 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             drawer_layout.closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.home, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_settings -> return true
-            else -> return super.onOptionsItemSelected(item)
         }
     }
 
