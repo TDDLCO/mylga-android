@@ -65,8 +65,8 @@ class YourFeed : Fragment(), FeedsRecyclerviewAdapter.OnNotifyDataSetChanged {
 
     override fun onResume() {
         super.onResume()
-        //getYourFeeds()
-        getFeeds()
+        getYourFeeds()
+        //getFeeds()
     }
 
     private fun getFeeds(){
@@ -106,12 +106,12 @@ class YourFeed : Fragment(), FeedsRecyclerviewAdapter.OnNotifyDataSetChanged {
             recyclerView?.visibility = View.GONE
             fab?.visibility = View.GONE
             noUpdateCardView?.visibility = View.GONE
-            // show some progress mechanism
+            loading_progress_bar?.visibility = View.VISIBLE
         }else{
             recyclerView?.visibility = View.VISIBLE
             fab?.visibility = View.VISIBLE
             noUpdateCardView?.visibility = View.GONE
-
+            loading_progress_bar?.visibility = View.GONE
             recyclerView?.apply {
                 layoutManager = LinearLayoutManager(activity)
                 adapter = FeedsRecyclerviewAdapter(feeds, context, this@YourFeed)
@@ -122,6 +122,7 @@ class YourFeed : Fragment(), FeedsRecyclerviewAdapter.OnNotifyDataSetChanged {
     private fun noFeedReturnedView(){
         recyclerView?.visibility = View.GONE
         fab?.visibility = View.GONE
+        loading_progress_bar?.visibility = View.GONE
         noUpdateCardView?.visibility = View.VISIBLE
     }
 
