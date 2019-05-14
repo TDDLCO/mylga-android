@@ -13,13 +13,20 @@ import co.tddl.mylga.R
 import co.tddl.mylga.model.Feed
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
+import co.tddl.mylga.adapter.FeedsRecyclerviewAdapter.OnNotifyDataSetChanged
 
-class FeedsRecyclerviewAdapter(private val list: MutableList<Feed>, private val context: Context)
+
+
+class FeedsRecyclerviewAdapter(private val list: MutableList<Feed>, private val context: Context, private val onNotifyDataSetChanged: OnNotifyDataSetChanged)
     : RecyclerView.Adapter<FeedsRecyclerviewAdapter.FeedViewHolder>() {
 
     private val TAG = "FeedRecyclerviewAdapter"
+
+
+    interface OnNotifyDataSetChanged {
+        fun OnNotifyDataSetChangedFired(dataSize: Int)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FeedViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -51,6 +58,7 @@ class FeedsRecyclerviewAdapter(private val list: MutableList<Feed>, private val 
         list.removeAt(position)
         notifyItemRemoved(position)
         notifyItemRangeChanged(position,list.size)
+        onNotifyDataSetChanged.OnNotifyDataSetChangedFired(list.size)
         deleteDbEntry(feed)
     }
 

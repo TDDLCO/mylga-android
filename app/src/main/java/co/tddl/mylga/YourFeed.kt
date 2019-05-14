@@ -28,9 +28,10 @@ private const val ARG_PARAM2 = "param2"
  * A simple [Fragment] subclass.
  *
  */
-class YourFeed : Fragment() {
+class YourFeed : Fragment(), FeedsRecyclerviewAdapter.OnNotifyDataSetChanged {
 
     private var fetched = false
+    private val TAG = "YourFeed"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +65,17 @@ class YourFeed : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        getYourFeeds()
+        //getYourFeeds()
+        getFeeds()
+    }
+
+    private fun getFeeds(){
+
+        val feeds = arrayListOf<Feed>(
+            Feed("ku67trdy", "http://googlr.com", "This is a description", "Locationn, Nigeria", "Just now", "path/string"),
+            Feed("ku67trdo", "http://googlrrr.com", "This is a description 2", "Location, Nigeria", "Just now", "path/stringg2")
+        )
+        initRecyclerView(feeds)
     }
 
     companion object {
@@ -90,13 +101,12 @@ class YourFeed : Fragment() {
             }
 
         if(feeds.isNullOrEmpty() && fetched){
-            recyclerView?.visibility = View.GONE
-            fab?.visibility = View.GONE
-            noUpdateCardView?.visibility = View.VISIBLE
+            noFeedReturnedView()
         }else if(feeds.isNullOrEmpty() && !fetched){
             recyclerView?.visibility = View.GONE
             fab?.visibility = View.GONE
             noUpdateCardView?.visibility = View.GONE
+            // show some progress mechanism
         }else{
             recyclerView?.visibility = View.VISIBLE
             fab?.visibility = View.VISIBLE
@@ -104,8 +114,20 @@ class YourFeed : Fragment() {
 
             recyclerView?.apply {
                 layoutManager = LinearLayoutManager(activity)
-                adapter = FeedsRecyclerviewAdapter(feeds, context)
+                adapter = FeedsRecyclerviewAdapter(feeds, context, this@YourFeed)
             }
+        }
+    }
+
+    private fun noFeedReturnedView(){
+        recyclerView?.visibility = View.GONE
+        fab?.visibility = View.GONE
+        noUpdateCardView?.visibility = View.VISIBLE
+    }
+
+    override fun OnNotifyDataSetChangedFired(dataSize: Int) {
+        if (dataSize <= 0) {
+            noFeedReturnedView()
         }
     }
 
