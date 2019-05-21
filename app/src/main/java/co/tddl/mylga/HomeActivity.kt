@@ -134,7 +134,8 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 val address = geocoderHelper.getAddressFromLocation(location.latitude, location.longitude, applicationContext)
                 // Save address in shared preferences
                 val sharedPreferenceHelper = SharedPreferenceHelper(this)
-                sharedPreferenceHelper.setLastLocation(address)
+                sharedPreferenceHelper.setLastLocation(address, location.latitude.toString(), location.longitude.toString())
+
             }
 
         }

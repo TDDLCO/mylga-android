@@ -41,7 +41,7 @@ class FetchPlaces {
         coroutineScope.launch {
             Log.d("CRT", "Launched in coroutine")
             // Get the Deferred object for our Retrofit request
-            val getPropertiesDeferred = MapApi.retrofitService.getMatch(input, key)
+            val getPropertiesDeferred = MapApi.retrofitService.getMatch(input, key, "")
             try {
                 _status.value = MapApiStatus.LOADING
                 // this will run on a thread managed by Retrofit

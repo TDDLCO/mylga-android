@@ -48,9 +48,11 @@ class SharedPreferenceHelper(val context: Context?) {
     /**
      * Sets true for location granted preference
      */
-    fun setLastLocation(location: String?){
+    fun setLastLocation(location: String?, latitude: String, longitude: String){
         val editor: SharedPreferences.Editor = sharedPref.edit()
         editor.putString(SharedPreferenceContract.PREF_LAST_LOCATION, location)
+        editor.putString(SharedPreferenceContract.PREF_LAST_LOCATION_LAT, latitude)
+        editor.putString(SharedPreferenceContract.PREF_LAST_LOCATION_LONG, longitude)
         setLastLocationUpdatedAt(editor)
         editor.apply()
     }
@@ -66,12 +68,33 @@ class SharedPreferenceHelper(val context: Context?) {
     }
 
     /**
+     * Gets the latitude of last location in preference file
+     */
+    fun getLatitude(): String?{
+        if(sharedPref.contains(SharedPreferenceContract.PREF_LAST_LOCATION_LAT)){
+            return sharedPref.getString(SharedPreferenceContract.PREF_LAST_LOCATION_LAT, null)
+        }
+        return null
+    }
+
+    /**
+     * Gets the longitude of last location in preference file
+     */
+    fun getLongitude(): String?{
+        if(sharedPref.contains(SharedPreferenceContract.PREF_LAST_LOCATION_LONG)){
+            return sharedPref.getString(SharedPreferenceContract.PREF_LAST_LOCATION_LONG, null)
+        }
+        return null
+    }
+
+    /**
      * Sets true for location granted preference
      */
     private fun setLastLocationUpdatedAt(editor: SharedPreferences.Editor){
         val date = Date(System.currentTimeMillis())
         editor.putLong(SharedPreferenceContract.PREF_LAST_LOCATION_UPDATED_AT, date.time)
     }
+
 
     fun lastLocationUpdatedOverOneDay(): Boolean{
 

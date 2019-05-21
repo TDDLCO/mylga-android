@@ -19,7 +19,7 @@ val retrofit = Retrofit.Builder()
 
 interface MapApiService {
     @GET("json")
-    fun getMatch(@Query("input") input: String, @Query("key") key: String):
+    fun getMatch(@Query("input") input: String, @Query("key") key: String, @Query("location") location: String):
             Deferred<JsonObject>
 
 }

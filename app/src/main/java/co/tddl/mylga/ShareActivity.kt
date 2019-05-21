@@ -37,6 +37,7 @@ import androidx.lifecycle.MutableLiveData
 import co.tddl.mylga.networking.FetchPlaces
 import co.tddl.mylga.networking.MapApi
 import co.tddl.mylga.networking.MapApiStatus
+import co.tddl.mylga.util.SharedPreferenceHelper
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
@@ -81,6 +82,16 @@ class ShareActivity : AppCompatActivity() {
         _status = MutableLiveData<MapApiStatus>()
         _properties = MutableLiveData<JsonObject>()
 
+        // Get latitude & longitude
+        val sharedPreferenceHelper = SharedPreferenceHelper(this)
+        val lat = sharedPreferenceHelper.getLatitude()
+        val long = sharedPreferenceHelper.getLongitude()
+
+        var latlong = ""
+        if(lat != null && long != null){
+            latlong = "$lat,$long"
+        }
+
         btn_upload_image.setOnClickListener { takePictureWithCamera() }
         btn_share_something.setOnClickListener { uploadImage() }
         edit_text_location.addTextChangedListener(object : TextWatcher {
@@ -92,7 +103,7 @@ class ShareActivity : AppCompatActivity() {
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 // Log.d("Changed", p0.toString()
-                getMapLocationSuggestions(p0.toString(), BuildConfig.GCP_API_KEY)
+                getMapLocationSuggestions(p0.toString(), BuildConfig.GCP_API_KEY, latlong)
             }
         })
         edit_text_location.onItemSelectedListener
@@ -116,12 +127,12 @@ class ShareActivity : AppCompatActivity() {
         }
     }
 
-    private fun getMapLocationSuggestions(input: String, key: String) {
+    private fun getMapLocationSuggestions(input: String, key: String, latlong: String) {
         Log.d("CRT", "Launched")
         coroutineScope.launch {
             Log.d("CRT", "Launched in coroutine")
             // Get the Deferred object for our Retrofit request
-            val getPropertiesDeferred = MapApi.retrofitService.getMatch(input, key)
+            val getPropertiesDeferred = MapApi.retrofitService.getMatch(input, key, latlong)
             try {
                 _status?.value = MapApiStatus.LOADING
                 // this will run on a thread managed by Retrofit
