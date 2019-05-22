@@ -135,7 +135,6 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 // Save address in shared preferences
                 val sharedPreferenceHelper = SharedPreferenceHelper(this)
                 sharedPreferenceHelper.setLastLocation(address, location.latitude.toString(), location.longitude.toString())
-
             }
 
         }

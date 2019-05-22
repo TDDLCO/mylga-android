@@ -3,6 +3,8 @@ package co.tddl.mylga.onboarding
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.WindowManager
 import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,13 +33,10 @@ class ConfirmationActivity : AppCompatActivity() {
             }else{
                 val sharedPref = SharedPreferenceHelper(this)
                 sharedPref.setUserName(username.toString())
-
+                // add loading screen
+                confirmation_loading_screen.visibility = View.VISIBLE
+                window.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
                 saveUserName(username.toString())
-
-                /* val intent = Intent(this, PermissionActivity::class.java)
-                intent.putExtra(INTENT_USER_NAME, username.toString())
-                startActivity(intent)
-                finish() */
             }
         }
     }
@@ -59,14 +58,16 @@ class ConfirmationActivity : AppCompatActivity() {
                     db.collection("users")
                         .add(user)
                         .addOnSuccessListener { documentReference ->
-                            Toast.makeText(applicationContext, "Done", Toast.LENGTH_LONG).show()
+                            //Toast.makeText(applicationContext, "Done", Toast.LENGTH_LONG).show()
                             val intent = Intent(this, PermissionActivity::class.java)
                             intent.putExtra(INTENT_USER_NAME, username)
                             startActivity(intent)
                             finish()
                         }
                         .addOnFailureListener { e ->
-                            Toast.makeText(applicationContext, "Error", Toast.LENGTH_LONG).show()
+                            confirmation_loading_screen.visibility = View.GONE
+                            window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+                            Toast.makeText(applicationContext, "Error. Could not save username", Toast.LENGTH_LONG).show()
                         }
 
                 }else{
@@ -75,18 +76,24 @@ class ConfirmationActivity : AppCompatActivity() {
                     db.collection("users").document(docId)
                         .set(user)
                         .addOnSuccessListener {
-                            Toast.makeText(applicationContext, "Done", Toast.LENGTH_LONG).show()
+                            //Toast.makeText(applicationContext, "Done", Toast.LENGTH_LONG).show()
                             val intent = Intent(this, PermissionActivity::class.java)
                             intent.putExtra(INTENT_USER_NAME, username)
                             startActivity(intent)
                             finish()
                         }
-                        .addOnFailureListener { e -> Toast.makeText(applicationContext, "Error", Toast.LENGTH_LONG).show() }
+                        .addOnFailureListener { e ->
+                            confirmation_loading_screen.visibility = View.GONE
+                            window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+                            Toast.makeText(applicationContext, "Error. Could not save username", Toast.LENGTH_LONG).show()
+                        }
 
                 }
             }
             .addOnFailureListener { exception ->
-                Log.w("Error", "Error getting documents: ", exception)
+                confirmation_loading_screen.visibility = View.GONE
+                window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+                Toast.makeText(applicationContext, "Error. Could not save username", Toast.LENGTH_LONG).show()
             }
     }
 }

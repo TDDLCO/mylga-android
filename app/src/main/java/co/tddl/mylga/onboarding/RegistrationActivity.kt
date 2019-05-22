@@ -119,7 +119,7 @@ class RegistrationActivity : AppCompatActivity() {
             }
 
         }else{
-            Toast.makeText(this, "No account yet", Toast.LENGTH_LONG).show()
+            Log.w("AUTH", "No Account Yet")
         }
     }
 
