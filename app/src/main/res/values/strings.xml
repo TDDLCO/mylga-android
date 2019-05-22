@@ -31,4 +31,8 @@
     <string name="fb_login_protocol_scheme">fb788910464829164</string>
     <string name="text_enable_location">You need to enable locations to see what happens around you</string>
     <string name="txt_delete">Delete</string>
+    <string name="text_lets_get_through_things">Let’s get through a few things.</string>
+    <string name="text_continue">Continue</string>
+    <string name="permission_to_access_images">Permission to access images</string>
+    <string name="permission_to_access_location">Permission to access location</string>
 </resources>
