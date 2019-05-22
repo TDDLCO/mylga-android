@@ -132,7 +132,7 @@ class ShareActivity : AppCompatActivity() {
         coroutineScope.launch {
             Log.d("CRT", "Launched in coroutine")
             // Get the Deferred object for our Retrofit request
-            val getPropertiesDeferred = MapApi.retrofitService.getMatch(input, key, latlong)
+            val getPropertiesDeferred = MapApi.retrofitService.getMatch(input, key, latlong, "1000", "")
             try {
                 _status?.value = MapApiStatus.LOADING
                 // this will run on a thread managed by Retrofit
