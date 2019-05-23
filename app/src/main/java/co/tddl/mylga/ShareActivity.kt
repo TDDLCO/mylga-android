@@ -7,12 +7,9 @@ import kotlinx.android.synthetic.main.activity_share.*
 import kotlinx.android.synthetic.main.content_share.*
 import android.content.Intent
 import android.provider.MediaStore
-import android.graphics.Bitmap
-import android.R.attr.data
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ClipData
-import android.content.ClipDescription
 import android.net.Uri
 import android.os.Build
 import android.text.Editable
@@ -21,7 +18,6 @@ import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.core.content.FileProvider.getUriForFile
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import java.io.File
@@ -29,28 +25,21 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import com.google.firebase.storage.UploadTask
-import com.google.firebase.storage.OnProgressListener
-import co.tddl.mylga.onboarding.MainActivity
-import androidx.annotation.NonNull
-import androidx.lifecycle.LiveData
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.FileProvider
 import androidx.lifecycle.MutableLiveData
-import co.tddl.mylga.networking.FetchPlaces
 import co.tddl.mylga.networking.MapApi
 import co.tddl.mylga.networking.MapApiStatus
 import co.tddl.mylga.util.SharedPreferenceHelper
 import com.google.android.gms.tasks.Continuation
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.util.UUID.randomUUID
 
 
 class ShareActivity : AppCompatActivity() {
@@ -92,7 +81,7 @@ class ShareActivity : AppCompatActivity() {
             latlong = "$lat,$long"
         }
 
-        btn_upload_image.setOnClickListener { takePictureWithCamera() }
+        btn_upload_image.setOnClickListener { /*takePictureWithCamera()*/ selectImage() }
         btn_share_something.setOnClickListener { uploadImage() }
         edit_text_location.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
@@ -106,8 +95,35 @@ class ShareActivity : AppCompatActivity() {
                 getMapLocationSuggestions(p0.toString(), BuildConfig.GCP_API_KEY, latlong)
             }
         })
-        edit_text_location.onItemSelectedListener
+        //edit_text_location.onItemSelectedListener
 
+        Toast.makeText(this,"Authority - ${applicationContext.packageName}" , Toast.LENGTH_LONG).show()
+
+
+    }
+
+    private fun selectImage(){
+        val options = arrayOf("Take Photo", "Choose from Gallery", "Cancel")
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Add Photo!")
+        builder.setItems(options
+        ) { dialog, which ->
+            when (which) {
+                0 -> {
+                    /*val takePhotoIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    val file = File(android.os.Environment.getExternalStorageDirectory(), "temp.jpg")
+                    takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file))
+                    startActivityForResult(takePhotoIntent, 1)*/
+                    takePictureWithCamera()
+                }
+                1 -> {
+                    val galleryIntent = Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                    startActivityForResult(galleryIntent, 2)
+                }
+                else -> dialog.dismiss()
+            }
+        }
+        builder.show()
     }
 
     // 1. Launch Intent to Choose picture
@@ -191,16 +207,19 @@ class ShareActivity : AppCompatActivity() {
         } else {
             newFile.parentFile.mkdirs()
         }
-        filePath = getUriForFile(this, "co.tddl.mylga.fileprovider", newFile)
+        //filePath = getUriForFile(this, "co.tddl.mylga.fileprovider", newFile)
+        filePath = FileProvider.getUriForFile(this, applicationContext.packageName + ".fileprovider", newFile)
 
         // 3
         captureIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, filePath)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            captureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         } else {
             val clip = ClipData.newUri(contentResolver, "A photo", filePath)
             captureIntent.clipData = clip
             captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            captureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         startActivityForResult(captureIntent, REQUEST_IMAGE_CAPTURE)
     }
