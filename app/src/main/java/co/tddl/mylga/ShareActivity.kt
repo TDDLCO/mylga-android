@@ -2,16 +2,16 @@ package co.tddl.mylga
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-
 import kotlinx.android.synthetic.main.activity_share.*
 import kotlinx.android.synthetic.main.content_share.*
 import android.content.Intent
 import android.provider.MediaStore
-import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ClipData
+import android.graphics.Bitmap
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -22,11 +22,9 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import java.io.File
 import java.io.IOException
-import java.text.SimpleDateFormat
 import java.util.*
 import com.google.firebase.storage.UploadTask
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.FileProvider
 import androidx.lifecycle.MutableLiveData
 import co.tddl.mylga.networking.MapApi
 import co.tddl.mylga.networking.MapApiStatus
@@ -40,7 +38,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-
+import java.io.ByteArrayOutputStream
+import java.io.FileOutputStream
 
 class ShareActivity : AppCompatActivity() {
 
@@ -95,35 +94,55 @@ class ShareActivity : AppCompatActivity() {
                 getMapLocationSuggestions(p0.toString(), BuildConfig.GCP_API_KEY, latlong)
             }
         })
-        //edit_text_location.onItemSelectedListener
-
-        Toast.makeText(this,"Authority - ${applicationContext.packageName}" , Toast.LENGTH_LONG).show()
-
-
     }
 
     private fun selectImage(){
         val options = arrayOf("Take Photo", "Choose from Gallery", "Cancel")
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Add Photo!")
+        builder.setTitle("Add Photo")
         builder.setItems(options
         ) { dialog, which ->
             when (which) {
-                0 -> {
-                    /*val takePhotoIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    val file = File(android.os.Environment.getExternalStorageDirectory(), "temp.jpg")
-                    takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file))
-                    startActivityForResult(takePhotoIntent, 1)*/
-                    takePictureWithCamera()
-                }
-                1 -> {
-                    val galleryIntent = Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                    startActivityForResult(galleryIntent, 2)
-                }
+                0 -> { takePhotoFromCamera() }
+                1 -> { chooseImage() }
                 else -> dialog.dismiss()
             }
         }
         builder.show()
+    }
+
+
+    private fun takePhotoFromCamera(){
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
+    }
+
+    private fun saveImage(myBitmap: Bitmap): Uri? {
+        val bytes = ByteArrayOutputStream(myBitmap.width * myBitmap.height)
+        myBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+
+        val wallpaperDirectory = File((Environment.getExternalStorageDirectory()).toString() + "/camera")
+
+        if (!wallpaperDirectory.exists()) {
+            wallpaperDirectory.mkdirs()
+        }
+
+        try {
+            val f = File(wallpaperDirectory, ((Calendar.getInstance()
+                .timeInMillis).toString() + ".jpg"))
+            f.createNewFile()
+            val fo = FileOutputStream(f)
+            fo.write(bytes.toByteArray()) //bytes.toByteArray()
+            MediaScannerConnection.scanFile(this, arrayOf(f.path), arrayOf("image/jpeg"), null)
+            fo.close()
+
+            return Uri.fromFile( File(f.absolutePath))
+        }
+        catch (e1: IOException) {
+            e1.printStackTrace()
+        }
+
+        return null
     }
 
     // 1. Launch Intent to Choose picture
@@ -132,15 +151,6 @@ class ShareActivity : AppCompatActivity() {
         intent.type = "image/*"
         intent.action = Intent.ACTION_GET_CONTENT
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST)
-    }
-
-    // 2. Launch Intent to take picture
-    private fun dispatchTakePictureIntent() {
-        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-            takePictureIntent.resolveActivity(packageManager)?.also {
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
-            }
-        }
     }
 
     private fun getMapLocationSuggestions(input: String, key: String, latlong: String) {
@@ -167,7 +177,7 @@ class ShareActivity : AppCompatActivity() {
         }
     }
 
-    fun parseJson(jsonObject: JsonObject){
+    fun parseJson(jsonObject: JsonObject?){
 
         if(jsonObject != null) {
             val jsonArray = jsonObject.getAsJsonArray("predictions")
@@ -193,39 +203,6 @@ class ShareActivity : AppCompatActivity() {
 
     }
 
-    @SuppressLint("SimpleDateFormat")
-    private fun takePictureWithCamera() {
-        // 1
-        val captureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-
-        // 2
-        val imagePath = File(filesDir, "pictures")
-        val dateTime = SimpleDateFormat("yyyyMMddHHmmss'.jpg'").format(Date())
-        val newFile = File(imagePath, dateTime)
-        if (newFile.exists()) {
-            newFile.delete()
-        } else {
-            newFile.parentFile.mkdirs()
-        }
-        //filePath = getUriForFile(this, "co.tddl.mylga.fileprovider", newFile)
-        filePath = FileProvider.getUriForFile(this, applicationContext.packageName + ".fileprovider", newFile)
-
-        // 3
-        captureIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, filePath)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-            captureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        } else {
-            val clip = ClipData.newUri(contentResolver, "A photo", filePath)
-            captureIntent.clipData = clip
-            captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-            captureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-        startActivityForResult(captureIntent, REQUEST_IMAGE_CAPTURE)
-    }
-
-
-    // Helper method
     private fun setImageViewWithImage() {
         val photoPath: Uri = filePath ?: return
         try {
@@ -234,11 +211,7 @@ class ShareActivity : AppCompatActivity() {
         } catch (e: IOException) {
             e.printStackTrace()
         }
-
-        Toast.makeText(this, "Photopath: $photoPath", Toast.LENGTH_LONG).show()
     }
-
-
 
     // 2. Show bitmap image result
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -246,20 +219,19 @@ class ShareActivity : AppCompatActivity() {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK
             && data != null && data.data != null
         ) {
-            return
-            /*filePath = data.data
+            filePath = data.data
             try {
                 val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, filePath)
                 uploadImage.setImageBitmap(bitmap)
             } catch (e: IOException) {
                 e.printStackTrace()
-            }*/
+            }
         }
 
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            // val imageBitmap = data?.extras?.get("data") as Bitmap
-            // uploadImage.setImageBitmap(imageBitmap)
-            setImageViewWithImage()
+        if (requestCode == REQUEST_IMAGE_CAPTURE){
+            val thumbnail = data!!.extras!!.get("data") as Bitmap
+            uploadImage.setImageBitmap(thumbnail)
+            filePath = saveImage(thumbnail)
         }
     }
 
@@ -284,16 +256,6 @@ class ShareActivity : AppCompatActivity() {
         val pathString = "uploads/${UUID.randomUUID()}"
         val ref = storageReference?.child(pathString)
         val uploadTask = ref?.putFile(filePath!!)
-            /*?.addOnSuccessListener { taskSnapshot ->
-                Toast.makeText(this, "Uploaded ${ref.downloadUrl}", Toast.LENGTH_LONG).show()
-                location.text = ref.downloadUrl.toString()
-            }
-            ?.addOnFailureListener { e ->
-                Toast.makeText(this, "Failed " + e.message, Toast.LENGTH_LONG).show()
-            }
-            ?.addOnProgressListener { taskSnapshot ->
-                Toast.makeText(this, "Uploading... ", Toast.LENGTH_LONG).show()
-            }*/
 
         val urlTask = uploadTask?.continueWithTask(Continuation<UploadTask.TaskSnapshot, Task<Uri>> { task ->
             if (!task.isSuccessful) {
@@ -308,7 +270,6 @@ class ShareActivity : AppCompatActivity() {
                 addUploadRecordToDb(pathString, downloadUri.toString(), edit_text_location.text.toString(), edit_text_description.text.toString())
             } else {
                 // Handle failures
-                // ...
             }
         }?.addOnFailureListener{
 
