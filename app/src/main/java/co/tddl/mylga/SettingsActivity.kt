@@ -15,11 +15,7 @@ class SettingsActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        change_password_relative_layout.setOnClickListener {
-            val intent = Intent(applicationContext, ChangePasswordActivity::class.java)
-            startActivity(intent)
-        }
+        
     }
 
 }
