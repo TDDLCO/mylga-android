@@ -23,7 +23,6 @@
                 app:contentScrim="?attr/colorPrimary"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
                 app:titleEnabled="true"
-                app:title="Emeka Mordi"
         >
 
             <ImageView
