@@ -17,7 +17,7 @@ class GeocoderHelper {
             val addressList = geocoder.getFromLocation(latitude, longitude, 1)
             if (addressList != null && addressList.size > 0) {
                 val address = addressList[0]
-                result = address.adminArea
+                result = address.locality
             }
         } catch (e: IOException) {
             Log.e(TAG, "Unable connect to Geocoder", e)

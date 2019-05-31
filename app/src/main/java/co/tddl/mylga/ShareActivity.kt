@@ -1,5 +1,6 @@
 package co.tddl.mylga
 
+import android.Manifest
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_share.*
@@ -7,6 +8,7 @@ import kotlinx.android.synthetic.main.content_share.*
 import android.content.Intent
 import android.provider.MediaStore
 import android.app.Activity
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.media.MediaScannerConnection
 import android.net.Uri
@@ -16,6 +18,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.google.firebase.storage.FirebaseStorage
@@ -25,6 +28,9 @@ import java.io.IOException
 import java.util.*
 import com.google.firebase.storage.UploadTask
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.MutableLiveData
 import co.tddl.mylga.networking.MapApi
 import co.tddl.mylga.networking.MapApiStatus
@@ -40,19 +46,24 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
 
 class ShareActivity : AppCompatActivity() {
 
     private val PICK_IMAGE_REQUEST = 71
     private val REQUEST_IMAGE_CAPTURE = 21
+    private val MY_PERMISSIONS_REQUEST_STORAGE_AND_CAMERA = 201
     private var filePath: Uri? = null
     private var firebaseStore: FirebaseStorage? = null
     private var storageReference: StorageReference? = null
     private lateinit var auth: FirebaseAuth
     private lateinit var viewModelJob: Job
     private lateinit var coroutineScope: CoroutineScope
+    private lateinit var fileCoroutineScope: CoroutineScope
     private var _status: MutableLiveData<MapApiStatus>? = null
     private var _properties: MutableLiveData<JsonObject>? = null
+    private var currentPhotoPath: String? = null
+    val REQUEST_TAKE_PHOTO = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,6 +77,7 @@ class ShareActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         viewModelJob = Job()
         coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
+        fileCoroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
         _status = MutableLiveData<MapApiStatus>()
         _properties = MutableLiveData<JsonObject>()
@@ -103,7 +115,14 @@ class ShareActivity : AppCompatActivity() {
         builder.setItems(options
         ) { dialog, which ->
             when (which) {
-                0 -> { takePhotoFromCamera() }
+                0 -> {
+                    if(Build.VERSION.SDK_INT > 21)
+                        checkReadWritePermission()
+                    else {
+                        Toast.makeText(this, "Older Phone", Toast.LENGTH_LONG).show()
+                        checkReadWritePermission()
+                    }
+                }
                 1 -> { chooseImage() }
                 else -> dialog.dismiss()
             }
@@ -111,35 +130,106 @@ class ShareActivity : AppCompatActivity() {
         builder.show()
     }
 
+    private fun checkReadWritePermission(){
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            dispatchTakePictureIntent()
+        } else{
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), MY_PERMISSIONS_REQUEST_STORAGE_AND_CAMERA
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if(requestCode == MY_PERMISSIONS_REQUEST_STORAGE_AND_CAMERA && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            // save location in preference
+            dispatchTakePictureIntent()
+        }else{
+            Toast.makeText(this, "Permission not granted", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val storageDir: File = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "JPEG_${timeStamp}_", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        ).apply {
+            // Save a file: path for use with ACTION_VIEW intents
+            currentPhotoPath = absolutePath
+        }
+    }
+
+    private fun dispatchTakePictureIntent() {
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            // Ensure that there's a camera activity to handle the intent
+            takePictureIntent.resolveActivity(packageManager)?.also {
+                // Create the File where the photo should go
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    // Error occurred while creating the File
+                    null
+                }
+                // Continue only if the File was successfully created
+                photoFile?.also {
+                    val photoURI: Uri = FileProvider.getUriForFile(
+                        this,
+                        "co.tddl.mylga.fileprovider",
+                        it
+                    )
+                    filePath = photoURI
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO)
+
+                }
+            }
+        }
+    }
 
     private fun takePhotoFromCamera(){
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
     }
 
-    private fun saveImage(myBitmap: Bitmap): Uri? {
+    fun saveImage(myBitmap: Bitmap): Uri? {
         val bytes = ByteArrayOutputStream(myBitmap.width * myBitmap.height)
         myBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
 
-        val wallpaperDirectory = File((Environment.getExternalStorageDirectory()).toString() + "/camera")
+        val wallpaperDirectory = File((Environment.getExternalStorageDirectory().absolutePath).toString() + "/mylga/camera")
 
         if (!wallpaperDirectory.exists()) {
             wallpaperDirectory.mkdirs()
         }
 
         try {
-            val f = File(wallpaperDirectory, ((Calendar.getInstance()
-                .timeInMillis).toString() + ".jpg"))
+            val f = File(wallpaperDirectory, (("mylga_"+ Calendar.getInstance()
+                .timeInMillis) + ".jpg"))
             f.createNewFile()
             val fo = FileOutputStream(f)
             fo.write(bytes.toByteArray()) //bytes.toByteArray()
             MediaScannerConnection.scanFile(this, arrayOf(f.path), arrayOf("image/jpeg"), null)
             fo.close()
 
+            runOnUiThread {
+                btn_upload_image.visibility = View.VISIBLE
+            }
+
             return Uri.fromFile( File(f.absolutePath))
         }
         catch (e1: IOException) {
+            Log.e("IMG_ERROR", "${e1.message}")
             e1.printStackTrace()
+        }
+
+        runOnUiThread {
+            btn_upload_image.visibility = View.VISIBLE
         }
 
         return null
@@ -158,7 +248,7 @@ class ShareActivity : AppCompatActivity() {
         coroutineScope.launch {
             Log.d("CRT", "Launched in coroutine")
             // Get the Deferred object for our Retrofit request
-            val getPropertiesDeferred = MapApi.retrofitService.getMatch(input, key, latlong, "1000", "")
+            val getPropertiesDeferred = MapApi.retrofitService.getMatch(input, key, latlong, "3000", "")
             try {
                 _status?.value = MapApiStatus.LOADING
                 // this will run on a thread managed by Retrofit
@@ -203,15 +293,6 @@ class ShareActivity : AppCompatActivity() {
 
     }
 
-    private fun setImageViewWithImage() {
-        val photoPath: Uri = filePath ?: return
-        try {
-            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, photoPath)
-            uploadImage.setImageBitmap(bitmap)
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
 
     // 2. Show bitmap image result
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -228,10 +309,21 @@ class ShareActivity : AppCompatActivity() {
             }
         }
 
-        if (requestCode == REQUEST_IMAGE_CAPTURE){
+        /*if (requestCode == REQUEST_IMAGE_CAPTURE){
             val thumbnail = data!!.extras!!.get("data") as Bitmap
             uploadImage.setImageBitmap(thumbnail)
-            filePath = saveImage(thumbnail)
+            btn_upload_image.visibility = View.GONE
+            //filePath = saveImage(thumbnail)
+            fileCoroutineScope.launch {
+                filePath = saveImage(thumbnail)
+            }
+            //Toast.makeText(applicationContext, "$filePath", Toast.LENGTH_LONG).show()
+        }*/
+
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, filePath)
+            uploadImage.setImageBitmap(bitmap)
+            Toast.makeText(this, "$filePath", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -277,7 +369,8 @@ class ShareActivity : AppCompatActivity() {
     }
 
     private fun showLoading(){
-        progress_bar.visibility = View.VISIBLE
+        share_loading_screen.visibility = View.VISIBLE
+        window.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             edit_text_description.focusable = View.NOT_FOCUSABLE
             edit_text_location.focusable = View.NOT_FOCUSABLE
@@ -289,7 +382,8 @@ class ShareActivity : AppCompatActivity() {
     }
 
     private fun hideLoading(){
-        progress_bar.visibility = View.GONE
+        share_loading_screen.visibility = View.GONE
+        window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             edit_text_description.focusable = View.FOCUSABLE
             edit_text_location.focusable = View.FOCUSABLE
