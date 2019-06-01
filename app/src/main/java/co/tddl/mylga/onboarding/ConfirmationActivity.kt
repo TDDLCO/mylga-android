@@ -12,6 +12,7 @@ import co.tddl.mylga.HomeActivity
 import co.tddl.mylga.R
 import co.tddl.mylga.model.Feed
 import co.tddl.mylga.util.SharedPreferenceHelper
+import co.tddl.mylga.util.getTodaysDate
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -53,8 +54,13 @@ class ConfirmationActivity : AppCompatActivity() {
             .get()
             .addOnSuccessListener { documents ->
                 if(documents.isEmpty){
-                    // document does not exist
-                    //  create record
+                    // document does not exist so create record
+                    // add more rows for new user - settings, date joined & profile picture
+                    user["showPicture"] = true
+                    user["showLocation"] = true
+                    user["profilePicture"] = ""
+                    user["createdAt"] = getTodaysDate()
+
                     db.collection("users")
                         .add(user)
                         .addOnSuccessListener { documentReference ->
