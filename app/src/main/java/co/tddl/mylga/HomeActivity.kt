@@ -28,6 +28,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.nav_header_home.*
 
 class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener{
@@ -87,9 +88,21 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             .whereEqualTo("id", auth.currentUser?.uid.toString())
             .get()
             .addOnSuccessListener { documents ->
-                val username = documents.first()["name"].toString()
+                val user = documents.first()
+                val username = user["name"].toString()
                 text_view_user_name.text = username
                 text_view_email.text = auth.currentUser?.email
+                //profilePicture
+                if(user["profilePicture"].toString().trim().isNullOrEmpty()){
+                    profile_image.setImageResource(R.drawable.user)
+                }else{
+                    // add actual image with picasso
+                    Picasso.get()
+                        .load(user["profilePicture"].toString())
+                        .placeholder(R.drawable.user)
+                        .error(R.drawable.user)
+                        .into(profile_image)
+                }
             }
             .addOnFailureListener { exception ->
                 Log.w("Error", "Error getting documents: ", exception)

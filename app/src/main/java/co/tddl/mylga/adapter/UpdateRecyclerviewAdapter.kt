@@ -34,6 +34,7 @@ class UpdateRecyclerviewAdapter(private val list: List<Update>)
         private val TAG = "UpdateRecyclerAdapter"
 
         private var mImageView: ImageView? = null
+        private var mCircleImageView: ImageView? = null
         private var mDescriptionView: TextView? = null
         private var mLocationView: TextView? = null
         private var mAuthorView: TextView? = null
@@ -41,6 +42,7 @@ class UpdateRecyclerviewAdapter(private val list: List<Update>)
 
         init {
             mImageView = itemView.findViewById(R.id.image_view_update)
+            mCircleImageView = itemView.findViewById(R.id.image_view_author)
             mDescriptionView = itemView.findViewById(R.id.text_view_description)
             mLocationView = itemView.findViewById(R.id.text_view_location)
             mAuthorView = itemView.findViewById(R.id.text_view_author)
@@ -71,9 +73,9 @@ class UpdateRecyclerviewAdapter(private val list: List<Update>)
                         mLocationView?.visibility = View.GONE
                     }
 
-                    // set location visibility
+                    // set image visibility
                     if( ! (user["showPicture"] as Boolean ) ){
-                        mImageView?.visibility = View.GONE
+                        mCircleImageView?.visibility = View.GONE
                     }
                 }
                 .addOnFailureListener { exception ->
