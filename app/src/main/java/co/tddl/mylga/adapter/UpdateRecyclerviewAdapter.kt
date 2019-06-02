@@ -2,6 +2,7 @@ package co.tddl.mylga.adapter
 
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
@@ -64,6 +65,16 @@ class UpdateRecyclerviewAdapter(private val list: List<Update>)
                 .addOnSuccessListener { documents ->
                     val user = documents.first()
                     mAuthorView?.text = user["name"].toString()
+
+                    // set location visibility
+                    if( ! (user["showLocation"] as Boolean ) ){
+                        mLocationView?.visibility = View.GONE
+                    }
+
+                    // set location visibility
+                    if( ! (user["showPicture"] as Boolean ) ){
+                        mImageView?.visibility = View.GONE
+                    }
                 }
                 .addOnFailureListener { exception ->
                     Log.w(TAG, "Error getting documents: ", exception)

@@ -9,7 +9,6 @@ import co.tddl.mylga.onboarding.RegistrationActivity
 import co.tddl.mylga.util.SharedPreferenceHelper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-
 import kotlinx.android.synthetic.main.activity_settings.*
 import kotlinx.android.synthetic.main.content_settings.*
 
@@ -17,6 +16,8 @@ class SettingsActivity : AppCompatActivity() {
 
     private lateinit var sharedPrefHelper: SharedPreferenceHelper
     private var docId: String? = null
+    private var auth: FirebaseAuth? = null
+    private var db: FirebaseFirestore? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,8 +25,10 @@ class SettingsActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
+
         fetchUserDetails()
-        addCheckedChangeListeners()
 
         sharedPrefHelper = SharedPreferenceHelper(applicationContext)
 
@@ -38,16 +41,27 @@ class SettingsActivity : AppCompatActivity() {
 
     }
 
+
     private fun addCheckedChangeListeners(){
-        switch_show_picture.setOnCheckedChangeListener { buttonView, isChecked ->  }
-        switch_show_location.setOnCheckedChangeListener { buttonView, isChecked ->  }
+        switch_show_picture.setOnCheckedChangeListener { _, isChecked -> updateSettingInDb("showPicture", isChecked) }
+        switch_show_location.setOnCheckedChangeListener { _, isChecked -> updateSettingInDb("showLocation", isChecked) }
+    }
+
+    private fun updateSettingInDb(setting: String, value: Boolean){
+
+       db!!.collection("users").document(docId!!)
+            .update(setting, value)
+            .addOnSuccessListener {
+                Toast.makeText(applicationContext, "Updated!", Toast.LENGTH_LONG).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(applicationContext, "Error. Could not update setting", Toast.LENGTH_LONG).show()
+            }
     }
 
     private fun fetchUserDetails(){
-        val auth = FirebaseAuth.getInstance()
-        val db = FirebaseFirestore.getInstance()
-        db.collection("users")
-            .whereEqualTo("id", auth.currentUser?.uid.toString())
+        db!!.collection("users")
+            .whereEqualTo("id", auth!!.currentUser?.uid.toString())
             .get()
             .addOnSuccessListener { documents ->
                 docId = documents.first().id
@@ -69,6 +83,8 @@ class SettingsActivity : AppCompatActivity() {
         if(showLocation){
             switch_show_location.isChecked = true
         }
+
+        addCheckedChangeListeners()
     }
 
 }
