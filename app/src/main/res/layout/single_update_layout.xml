@@ -16,13 +16,23 @@
             android:layout_marginBottom="10dp"
     >
 
+        <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/image_view_author"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@drawable/user"
+        />
+
         <TextView
                 android:id="@+id/text_view_author"
+                android:layout_toEndOf="@id/image_view_author"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Emeka Mordi"
                 android:textSize="15sp"
                 android:layout_marginBottom="7dp"
+                android:layout_marginTop="7dp"
+                android:layout_marginLeft="10dp"
         />
 
         <TextView
@@ -31,6 +41,7 @@
                 android:layout_height="wrap_content"
                 android:text="4 hours ago"
                 android:textSize="15sp"
+                android:layout_marginTop="7dp"
                 android:layout_alignParentEnd="true"
         />
 
